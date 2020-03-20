@@ -4,7 +4,8 @@
   "description": "Wavefront Core Javascript SDK",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "lint": "eslint '**/*.js'",
+    "lint:fix": "prettier-eslint '**/*.js' --write"
   },
   "repository": {
     "type": "git",
@@ -16,5 +17,11 @@
   "bugs": {
     "url": "https://github.com/wavefrontHQ/wavefront-sdk-javascript/issues"
   },
-  "homepage": "https://github.com/wavefrontHQ/wavefront-sdk-javascript#readme"
+  "homepage": "https://github.com/wavefrontHQ/wavefront-sdk-javascript#readme",
+  "devDependencies": {
+    "eslint": "^6.8.0",
+    "eslint-config-prettier": "^6.10.0",
+    "eslint-plugin-prettier": "^3.1.2",
+    "prettier": "^1.19.1"
+  }
 }
