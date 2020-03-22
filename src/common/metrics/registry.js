@@ -2,13 +2,13 @@ import WavefrontSDKCounter from './counter';
 import WavefrontSDKGauge from './gauge';
 
 class WavefrontSdkMetricsRegistry {
-  constructor(
+  constructor({
     wfMetricSender,
     source = null,
     tags = null,
     prefix = null,
     reportingIntervalSecs = 60
-  ) {
+  }) {
     self.wfMetricSender = wfMetricSender;
     self.source = source;
     self.tags = tags;

@@ -10,7 +10,7 @@ class WavefrontSDKCounter extends Metrics {
     this._count += val;
   }
 
-  get count() {
+  count() {
     return this._count;
   }
 
