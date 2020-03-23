@@ -1,3 +1,5 @@
+'use strict';
+
 class Queue {
   constructor(maxQueueSize) {
     self._items = [];
@@ -43,6 +45,13 @@ class Queue {
   }
 }
 
+function isBlank(str) {
+  // Check if a string contains nothing or only whitespace
+  return (
+    str === null || str.length === 0 || str.replace(/\s/g, '').length === 0
+  );
+}
+
 function metricToLineData(
   name,
   value,
@@ -77,10 +86,12 @@ function tracingSpanToLineData(
 
 function spanLogToLineData(traceId, spanId, spanLogs, scrambler = null) {}
 
-export {
+module.exports = {
   metricToLineData,
   histogramToLineData,
   tracingSpanToLineData,
-  spanLogToLineData
+  spanLogToLineData,
+  isBlank,
+  Queue
 };
-export default Queue;
+// export default Queue;
