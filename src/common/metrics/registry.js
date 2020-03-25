@@ -9,72 +9,65 @@ class WavefrontSdkMetricsRegistry {
     prefix = null,
     reportingIntervalSecs = 60
   }) {
-    self.wfMetricSender = wfMetricSender;
-    self.source = source;
-    self.tags = tags;
-    self.prefix = prefix ? prefix + '.' : '';
-    self.reportingIntervalSecs = reportingIntervalSecs;
-    self.metrics = {};
-    self._closed = false;
-    self._timer = null;
+    this.wfMetricSender = wfMetricSender;
+    this.source = source;
+    this.tags = tags;
+    this.prefix = prefix ? prefix + '.' : '';
+    this.reportingIntervalSecs = reportingIntervalSecs;
+    this.metrics = new Map();
+    this._closed = false;
+    this._timer = null;
     if (wfMetricSender) {
-      self._scheduleTimer();
+      this._scheduleTimer();
     }
   }
 
   _scheduleTimer() {
-    if (!self._closed) {
-      self._timer = setInterval(this._run, self.reportingIntervalSecs);
-    }
-  }
-
-  _run() {
-    try {
-      self._report();
-    } finally {
-      if (!self.closed) {
-        self._scheduleTimer();
-      }
+    if (!this._closed) {
+      this._timer = setInterval(
+        () => this._report(),
+        this.reportingIntervalSecs
+      );
     }
   }
 
   close(timeoutSecs = null) {
     try {
-      if (self.wfMetricSender) self._report(timeoutSecs);
+      if (this.wfMetricSender) this._report(timeoutSecs);
     } finally {
-      self._closed = true;
-      if (self._timer) {
-        clearInterval(self._timer);
+      this._closed = true;
+      if (this._timer) {
+        clearInterval(this._timer);
       }
     }
   }
 
   _report(timeoutSecs = null) {
     let timestamp = Date.now();
-    for (const [key, val] of self.metrics.entries()) {
+    for (const [key, val] of this.metrics.entries()) {
       if (timeoutSecs && Date.now() - timestamp > timeoutSecs) break;
 
-      let name = self.prefix + key;
+      let name = this.prefix + key;
       try {
         if (val instanceof WavefrontSDKGauge) {
           let gaugeVal = val.getValue();
           if (gaugeVal) {
             // TODO: implement sendMetric
-            self.wfMetricSender.sendMetric(
+            this.wfMetricSender.sendMetric(
               name,
               gaugeVal,
               timestamp,
-              self.source,
-              self.tags
+              this.source,
+              this.tags
             );
           }
         } else if (val instanceof WavefrontSDKCounter) {
-          self.wfMetricSender.sendMetric(
+          this.wfMetricSender.sendMetric(
             name + '.count',
             val.count(),
             timestamp,
-            self.source,
-            self.tags
+            this.source,
+            this.tags
           );
         }
       } catch (error) {
@@ -85,17 +78,17 @@ class WavefrontSdkMetricsRegistry {
   }
 
   newCounter(name) {
-    return self._getOrAdd(name, new WavefrontSDKCounter());
+    return this._getOrAdd(name, new WavefrontSDKCounter());
   }
 
   newGauge(name, supplier) {
-    return self._getOrAdd(name, new WavefrontSDKGauge(supplier));
+    return this._getOrAdd(name, new WavefrontSDKGauge(supplier));
   }
 
   _getOrAdd(name, metric) {
-    let existingMetric = self.metrics[name];
+    let existingMetric = this.metrics[name];
     if (existingMetric) return existingMetric;
-    self.metrics[name] = metric;
+    this.metrics[name] = metric;
     return metric;
   }
 }

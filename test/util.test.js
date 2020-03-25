@@ -5,6 +5,11 @@ const utils = require('../src/common/utils');
 const granularity = require('../src/entities/histogram/histogramGranularity');
 
 describe('Test utility functions', function() {
+  it('Validate get chunk', function() {
+    let res = utils.getChunks([0, 0, 0, 0, 0, 0, 0], 3);
+    expect(res).to.eql([[0, 0, 0], [0, 0, 0], [0]]);
+  });
+
   it('Validate blank string checker', function() {
     let testEmptyString = '';
     let result = utils.isBlank(testEmptyString);

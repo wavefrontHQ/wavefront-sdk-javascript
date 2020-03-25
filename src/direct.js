@@ -1,205 +1,298 @@
-const utils = require('./common/utils');
-const constants = require('./common/constants');
-const Queue = utils.Queue;
-const WavefrontSdkMetricsRegistry = require('./common/metrics/registry')
-  .WavefrontSdkMetricsRegistry;
+const utils = require('./common/utils'),
+  constants = require('./common/constants'),
+  Queue = utils.Queue,
+  WavefrontSdkMetricsRegistry = require('./common/metrics/registry')
+    .WavefrontSdkMetricsRegistry,
+  https = require('https'),
+  zlib = require('zlib');
 
 class WavefrontDirectClient {
-  static WAVEFRONT_METRIC_FORMAT = 'wavefront';
-  static WAVEFRONT_HISTOGRAM_FORMAT = 'histogram';
-  static WAVEFRONT_TRACING_SPAN_FORMAT = 'trace';
-  static WAVEFRONT_SPAN_LOG_FORMAT = 'spanLogs';
-
+  // TODO: changed to named parameter
   constructor(
     server,
     token,
     maxQueueSize = 50000,
     batchSize = 10000,
-    flushIntervalSeconds = 5,
+    flushIntervalSeconds = 1,
     enableInternalMetrics = true
   ) {
-    self.server = server;
-    self._token = token;
-    self._maxQueueSize = maxQueueSize;
-    self._batchSize = batchSize;
-    self._flushIntervalSeconds = flushIntervalSeconds;
+    this.server = server;
+    this._batchSize = batchSize;
+    this._flushIntervalSeconds = flushIntervalSeconds;
     // TODO: socket
-    self._defaultSource = null;
-    // TODO: implement JS queue
-    self._metricsBuffer = new Queue(maxQueueSize);
-    self._histogramsBuffer = new Queue(maxQueueSize);
-    self._tracingSpansBuffer = new Queue(maxQueueSize);
-    self._spanLogsBuffer = new Queue(maxQueueSize);
-    self._headers = {
+    this._defaultSource = null;
+    this._metricsBuffer = new Queue(maxQueueSize);
+    this._histogramsBuffer = new Queue(maxQueueSize);
+    this._tracingSpansBuffer = new Queue(maxQueueSize);
+    this._spanLogsBuffer = new Queue(maxQueueSize);
+    this._headers = {
       'Content-Type': 'application/octet-stream',
       'Content-Encoding': 'gzip',
       Authorization: 'Bearer ' + token
     };
-    self._closed = false;
-    self._timer = null;
-    self._scheduleTimer();
+    this._timer = null;
+    this._scheduleTimer();
 
     if (enableInternalMetrics) {
       // TODO: test destructuring
-      self._sdkMetricsRegistry = WavefrontSdkMetricsRegistry({
-        wfMetricSender: self,
+      this._sdkMetricsRegistry = new WavefrontSdkMetricsRegistry({
+        wfMetricSender: this,
         prefix: `${constants.SDK_METRIC_PREFIX}.core.sender.direct`
       });
     } else {
-      self._sdkMetricsRegistry = WavefrontSdkMetricsRegistry({
+      this._sdkMetricsRegistry = new WavefrontSdkMetricsRegistry({
         wfMetricSender: null
       });
     }
 
-    // TODO: add queue size() function
-    self._sdkMetricsRegistry.newGauge(
+    this._sdkMetricsRegistry.newGauge(
       'points.queue.size',
-      self._metricsBuffer.size()
+      this._metricsBuffer.size()
     );
-    self._sdkMetricsRegistry.newGauge(
+    this._sdkMetricsRegistry.newGauge(
       'points.queue.remaining_capacity',
-      self._metricsBuffer.remainCapacity()
+      this._metricsBuffer.remainCapacity()
     );
-    self._pointsValid = self._sdkMetricsRegistry.newCounter('points.valid');
-    self._pointsInvalid = self._sdkMetricsRegistry.newCounter('points.invalid');
-    self._pointsDropped = self._sdkMetricsRegistry.newCounter('points.dropped');
-    self._pointsReportErrors = self._sdkMetricsRegistry.newCounter(
+    this._pointsValid = this._sdkMetricsRegistry.newCounter('points.valid');
+    this._pointsInvalid = this._sdkMetricsRegistry.newCounter('points.invalid');
+    this._pointsDropped = this._sdkMetricsRegistry.newCounter('points.dropped');
+    this._pointsReportErrors = this._sdkMetricsRegistry.newCounter(
       'points.report.errors'
     );
 
-    self._sdkMetricsRegistry.newGauge(
+    this._sdkMetricsRegistry.newGauge(
       'histograms.queue.size',
-      self._histogramsBuffer.size()
+      this._histogramsBuffer.size()
     );
-    self._sdkMetricsRegistry.newGauge(
+    this._sdkMetricsRegistry.newGauge(
       'histograms.queue.remaining_capacity',
-      self._histogramsBuffer.remainCapacity()
+      this._histogramsBuffer.remainCapacity()
     );
-    self._histogramsValid = self._sdkMetricsRegistry.newCounter(
+    this._histogramsValid = this._sdkMetricsRegistry.newCounter(
       'histograms.valid'
     );
-    self._histogramsInvalid = self._sdkMetricsRegistry.newCounter(
+    this._histogramsInvalid = this._sdkMetricsRegistry.newCounter(
       'histograms.invalid'
     );
-    self._histogramsDropped = self._sdkMetricsRegistry.newCounter(
+    this._histogramsDropped = this._sdkMetricsRegistry.newCounter(
       'histograms.dropped'
     );
-    self._histogramsReportErrors = self._sdkMetricsRegistry.newCounter(
+    this._histogramsReportErrors = this._sdkMetricsRegistry.newCounter(
       'histograms.report.errors'
     );
 
-    self._sdkMetricsRegistry.newGauge(
+    this._sdkMetricsRegistry.newGauge(
       'spans.queue.size',
-      self._tracingSpansBuffer.size()
+      this._tracingSpansBuffer.size()
     );
-    self._sdkMetricsRegistry.newGauge(
+    this._sdkMetricsRegistry.newGauge(
       'spans.queue.remaining_capacity',
-      self._tracingSpansBuffer.remainCapacity()
+      this._tracingSpansBuffer.remainCapacity()
     );
-    self._spansValid = self._sdkMetricsRegistry.newCounter('spans.valid');
-    self._spansInvalid = self._sdkMetricsRegistry.newCounter('spans.invalid');
-    self._spansDropped = self._sdkMetricsRegistry.newCounter('spans.dropped');
-    self._spansReportErrors = self._sdkMetricsRegistry.newCounter(
+    this._spansValid = this._sdkMetricsRegistry.newCounter('spans.valid');
+    this._spansInvalid = this._sdkMetricsRegistry.newCounter('spans.invalid');
+    this._spansDropped = this._sdkMetricsRegistry.newCounter('spans.dropped');
+    this._spansReportErrors = this._sdkMetricsRegistry.newCounter(
       'spans.report.errors'
     );
 
-    self._sdkMetricsRegistry.newGauge(
+    this._sdkMetricsRegistry.newGauge(
       'span_logs.queue.size',
-      self._spanLogsBuffer.size()
+      this._spanLogsBuffer.size()
     );
-    self._sdkMetricsRegistry.newGauge(
+    this._sdkMetricsRegistry.newGauge(
       'span_logs.queue.remaining_capacity',
-      self._spanLogsBuffer.remainCapacity()
+      this._spanLogsBuffer.remainCapacity()
     );
-    self._spanLogsValid = self._sdkMetricsRegistry.newCounter(
+    this._spanLogsValid = this._sdkMetricsRegistry.newCounter(
       'span_logs.valid'
     );
-    self._spanLogsInvalid = self._sdkMetricsRegistry.newCounter(
+    this._spanLogsInvalid = this._sdkMetricsRegistry.newCounter(
       'span_logs.invalid'
     );
-    self._spanLogsDropped = self._sdkMetricsRegistry.newCounter(
+    this._spanLogsDropped = this._sdkMetricsRegistry.newCounter(
       'span_logs.dropped'
     );
-    self._spanLogsReportErrors = self._sdkMetricsRegistry.newCounter(
+    this._spanLogsReportErrors = this._sdkMetricsRegistry.newCounter(
       'span_logs.report.errors'
     );
   }
 
+  /**
+   * Schedule a timer that flush every 5 seconds by default
+   */
   _scheduleTimer() {
-    // Flush every 5 seconds by default
-    if (!self._closed) {
-      self._timer = setInterval(this._flush, self._flushIntervalSeconds);
+    this._timer = setInterval(() => {
+      this._batchReport(
+        this._metricsBuffer.toArray,
+        constants.WAVEFRONT_METRIC_FORMAT,
+        'points',
+        this._pointsReportErrors
+      );
+      this._batchReport(
+        this._histogramsBuffer.toArray,
+        constants.WAVEFRONT_HISTOGRAM_FORMAT,
+        'histograms',
+        this._histogramsReportErrors
+      );
+      this._batchReport(
+        this._tracingSpansBuffer.toArray,
+        constants.WAVEFRONT_TRACING_SPAN_FORMAT,
+        'spans',
+        this._spansReportErrors
+      );
+      this._batchReport(
+        this._spanLogsBuffer.toArray,
+        constants.WAVEFRONT_SPAN_LOG_FORMAT,
+        'span_logs',
+        this._spanLogsReportErrors
+      );
+    }, this._flushIntervalSeconds);
+  }
+
+  /**
+   * Report data to server, and record metrics
+   */
+  _reportToServer(data, options, entityPrefix, reportErrors) {
+    let req = https.request(options, res => {
+      res.on('data', d => {
+        process.stdout.write(d);
+      });
+    });
+
+    req.on('error', e => {
+      reportErrors.inc();
+      console.error(e);
+    });
+
+    req.on('response', res => {
+      this._sdkMetricsRegistry
+        .newCounter(`${entityPrefix}.report.${res.statusCode}`)
+        .inc();
+      // console.log(res.statusCode);
+    });
+    req.write(data);
+    req.end();
+  }
+
+  /**
+   * One api call sending one given string data.
+   * @param {string} points - List of data in string format, concat by '\n'
+   * @param {string} dataFormat - Type of data to be sent
+   * @param {string} entityPrefix
+   * @param reportErrors
+   * @private
+   */
+  _report(points, dataFormat, entityPrefix, reportErrors) {
+    let options = {
+      hostname: this.server,
+      path: `/report/?f=${dataFormat}`,
+      method: 'POST',
+      headers: this._headers
+    };
+    zlib.gzip(points, (err, compressedPoints) => {
+      if (!err) {
+        options.headers['Content-Encoding'] = 'gzip';
+        options.headers['Content-Length'] = compressedPoints.length;
+        this._reportToServer(
+          compressedPoints,
+          options,
+          entityPrefix,
+          reportErrors
+        );
+      } else {
+        console.error('Error compressing data');
+        options.headers['Content-Length'] = points.length;
+        this._reportToServer(points, options, entityPrefix, reportErrors);
+      }
+    });
+  }
+
+  /**
+   * One api call sending one given list of data.
+   * @param batchLineData {Array}
+   * @param dataFormat {string}
+   * @param entityPrefix {string}
+   * @param reportErrors {string}
+   * @private
+   */
+  _batchReport(batchLineData, dataFormat, entityPrefix, reportErrors) {
+    for (let batch of utils.getChunks(batchLineData, this._batchSize)) {
+      try {
+        this._report(batch.join('\n'), dataFormat, entityPrefix, reportErrors);
+      } catch (error) {
+        throw Error(
+          `Failed to report ${dataFormat} data points to wavefront ${error}`
+        );
+      }
     }
   }
 
-  // TODO: test report function
-  // TODO: util compress data
-  _report(points, dataFormat, entityPrefix, reportErrors) {
-    let compressedData = null;
-    let url = self.server + '/report';
-    fetch(url, {
-      method: 'POST',
-      headers: self._headers,
-      data: compressedData
-    })
-      .then(response => response.json())
-      .then(data => {
-        console.log('Success:', data);
-      })
-      .catch(error => {
-        reportErrors.inc();
-        console.error('Error:', error);
-      });
+  /**
+   * Flush all buffer before close the client.
+   */
+  close() {
+    // TODO: flush before close
+    clearInterval(this._timer);
+    this._sdkMetricsRegistry.close(1);
   }
 
-  // TODO: use HTTP to report to server
-  _batchReport(batchLineData, dataFormat, entityPrefix, reportErrors) {}
-
-  _internalFlush(dataBuffer, dataFormat, entityPrefix, reportErrors) {
-    // Get all data from one data buffer to a list, and report that list
-  }
-
-  _flush() {}
-
-  _flushNow() {
-    // Flush all the data buffer immediately using _batchReport
-  }
-
-  close() {}
-
-  send_metric(name, value, timestamp, source, tags) {
+  /**
+   * Send Metric Data via direct ingest.
+   * @param {string} name - Metric name
+   * @param {number} value - Metric value
+   * @param {Number} timestamp
+   * @param {string} source
+   * @param {Map} tags
+   */
+  sendMetric(name, value, timestamp, source, tags) {
     let lineData;
     try {
-      lineData = util.metricToLineData(
+      lineData = utils.metricToLineData(
         name,
         value,
         timestamp,
         source,
         tags,
-        self._defaultSource
+        this._defaultSource
       );
-      self._pointsValid.inc();
+      this._pointsValid.inc();
     } catch (error) {
-      self._pointsInvalid.inc();
+      this._pointsInvalid.inc();
       console.error(error);
     }
     try {
-      self._metricsBuffer.push(lineData);
+      this._metricsBuffer.push(lineData);
     } catch (error) {
-      self._pointsDropped.inc();
+      this._pointsDropped.inc();
       console.error(error);
     }
   }
 
+  /**
+   * Send a list of metrics immediately.
+   * Have to construct the data manually by calling
+   * common.utils.metricToLineData()
+   * @param {Array} metrics - Array of string metrics data
+   */
   sendMetricNow(metrics) {
-    self._batchReport(
+    this._batchReport(
       metrics,
-      self.WAVEFRONT_METRIC_FORMAT,
+      constants.WAVEFRONT_METRIC_FORMAT,
       'points',
-      self._pointsReportErrors
+      this._pointsReportErrors
     );
   }
 
+  /**
+   * Send Distribution Data via direct ingestion.
+   * @param {string} name - Histogram name
+   * @param {Array} centroids - Array of centroids(pairs)
+   * @param {Set} histogramGranularities
+   * @param {Number} timestamp
+   * @param {string} source
+   * @param {Map} tags
+   */
   sendDistribution(
     name,
     centroids,
@@ -210,37 +303,56 @@ class WavefrontDirectClient {
   ) {
     let lineData;
     try {
-      lineData = util.histogramToLineData(
+      lineData = utils.histogramToLineData(
         name,
         centroids,
         histogramGranularities,
         timestamp,
         source,
         tags,
-        self._defaultSource
+        this._defaultSource
       );
-      self._histogramsValid.inc();
+      this._histogramsValid.inc();
     } catch (error) {
-      self._histogramsInvalid.inc();
+      this._histogramsInvalid.inc();
       console.error(error);
     }
     try {
-      self._histogramsBuffer.push(lineData);
+      this._histogramsBuffer.push(lineData);
     } catch (error) {
-      self._histogramsDropped.inc();
+      this._histogramsDropped.inc();
       console.error(error);
     }
   }
 
+  /**
+   * Send a list of distribution immediately.
+   * Have to construct the data manually by calling
+   * common.utils.histogramToLineData()
+   * @param {Array} distributions - Array of string histogram data
+   */
   sendDistributionNow(distributions) {
-    self._batchReport(
+    this._batchReport(
       distributions,
-      self.WAVEFRONT_HISTOGRAM_FORMAT,
+      constants.WAVEFRONT_HISTOGRAM_FORMAT,
       'histograms',
-      self._histogramsReportErrors
+      this._histogramsReportErrors
     );
   }
 
+  /**
+   * Send span data via direct ingestion.
+   * @param {string} name - Span name
+   * @param {number} startMillis
+   * @param {number} durationMillis
+   * @param {string} source
+   * @param {string} traceId
+   * @param {string} spanId
+   * @param {Array} parents - Parents span ID
+   * @param {Array} followsFrom
+   * @param {Array} tags
+   * @param spanLogs
+   */
   sendSpan(
     name,
     startMillis,
@@ -266,61 +378,77 @@ class WavefrontDirectClient {
         followsFrom,
         tags,
         spanLogs,
-        self._defaultSource
+        this._defaultSource
       );
-      self._spansValid.inc();
+      this._spansValid.inc();
     } catch (error) {
-      self._spansInvalid.inc();
+      this._spansInvalid.inc();
       console.error(error);
     }
     try {
-      self._tracingSpansBuffer.inc();
+      this._tracingSpansBuffer.push(lineData);
     } catch (error) {
-      self._spansDropped.inc();
+      this._spansDropped.inc();
       console.error(error);
     }
     if (spanLogs) {
       let spanLineData;
       try {
         spanLineData = utils.spanLogToLineData(traceId, spanId, spanLogs);
-        self._spanLogsValid.inc();
+        this._spanLogsValid.inc();
       } catch (error) {
-        self._spanLogsInvalid.inc();
+        this._spanLogsInvalid.inc();
         console.error(error);
       }
       try {
-        self._spanLogsBuffer.push(spanLineData);
+        this._spanLogsBuffer.push(spanLineData);
       } catch (error) {
-        self._spanLogsDropped.inc();
+        this._spanLogsDropped.inc();
         console.error(error);
       }
     }
   }
 
+  /**
+   * Send a list of spans immediately.
+   * Have to construct the data manually by calling
+   * common.utils.tracingSpanToLineData()
+   * @param {Array} spans - List of string spans data
+   */
   sendSpanNow(spans) {
-    self._batchReport(
+    this._batchReport(
       spans,
-      self.WAVEFRONT_TRACING_SPAN_FORMAT,
+      constants.WAVEFRONT_TRACING_SPAN_FORMAT,
       'spans',
-      self._spansReportErrors
+      this._spansReportErrors
     );
   }
 
+  /**
+   * Send a list of span logs immediately.
+   * Have to construct the data manually by calling
+   * common.utils.spanLogToLineData()
+   * @param {Array} spanLogs - List of string span logs data
+   */
   sendSpanLogNow(spanLogs) {
-    self._batchReport(
+    this._batchReport(
       spanLogs,
-      self.WAVEFRONT_SPAN_LOG_FORMAT,
+      constants.WAVEFRONT_SPAN_LOG_FORMAT,
       'span_logs',
-      self._spanLogsReportErrors
+      this._spanLogsReportErrors
     );
   }
 
+  /**
+   * Get failure count for one connection.
+   * @returns {number}
+   */
   getFailureCount() {
     return (
-      self._pointsReportErrors.count() +
-      self._histogramsReportErrors.count() +
-      self._spansReportErrors.count() +
-      self._spanLogsReportErrors.count()
+      this._pointsReportErrors.count() +
+      this._histogramsReportErrors.count() +
+      this._spansReportErrors.count() +
+      this._spanLogsReportErrors.count()
     );
   }
 }

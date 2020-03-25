@@ -4,59 +4,75 @@ class Queue {
   /**
    * Implements Javascript Queue.
    * @constructor
-   * @param {string} maxQueueSize - The maximum capacity for the queue.
+   * @param {number} maxQueueSize - The maximum capacity for the queue.
    */
   constructor(maxQueueSize) {
-    self._items = [];
-    self._maxQueueSize = maxQueueSize;
+    this._items = [];
+    this._maxQueueSize = maxQueueSize;
   }
 
   isEmpty() {
-    return self._items.length === 0;
+    return this._items.length === 0;
   }
 
   push(val) {
-    if (self.size() >= self._maxQueueSize) {
+    if (this.size() >= this._maxQueueSize) {
       throw Error('Exception raised because the queue is full.');
     } else {
-      self._items.push(val);
+      this._items.push(val);
     }
   }
 
   dequeue() {
-    if (!self.isEmpty()) {
-      return self._items.shift();
+    if (!this.isEmpty()) {
+      return this._items.shift();
     }
     return null;
   }
 
   peek() {
-    if (!self.isEmpty()) {
-      return self._items[0];
+    if (!this.isEmpty()) {
+      return this._items[0];
     }
     return null;
   }
 
   size() {
-    return self._items.length;
+    return this._items.length;
   }
 
   remainCapacity() {
-    return self._maxQueueSize - self._items.length;
+    return this._maxQueueSize - this._items.length;
   }
 
   get toArray() {
-    return self._items;
+    return this._items;
   }
 }
 
 /**
- * Check if a string contains nothing or only whitespace.
+ * Returns an array with arrays of the given size.
+ *
+ * @param {Array} points - Array to split
+ * @param {number} chunkSize - Size of every chunk
+ * @return {Array}
+ */
+function getChunks(points, chunkSize) {
+  let chunks = [];
+  while (points.length) {
+    chunks.push(points.splice(0, chunkSize));
+  }
+  return chunks;
+}
+
+/**
+ * Check if a string is null or contains nothing.
  */
 function isBlank(str) {
-  //
   return (
-    str === null || str.length === 0 || str.replace(/\s/g, '').length === 0
+    (typeof str == 'string' && !str.trim()) ||
+    typeof str == 'undefined' ||
+    str === null
   );
 }
 
@@ -154,9 +170,9 @@ function histogramToLineData(
     if (timestamp) {
       strBuilder.push(timestamp);
     }
-    for (let centroid of centroids) {
-      strBuilder.push('#' + centroid[1].toString());
-      strBuilder.push(centroid[0].toString());
+    for (const [value, count] of centroids) {
+      strBuilder.push('#' + count.toString());
+      strBuilder.push(value.toString());
     }
     strBuilder.push(sanitize(name));
     strBuilder.push('source=' + sanitize(source));
@@ -282,5 +298,6 @@ module.exports = {
   spanLogToLineData,
   isBlank,
   sanitize,
+  getChunks,
   Queue
 };
