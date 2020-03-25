@@ -1,4 +1,4 @@
-import Metrics from './metrics';
+const Metrics = require('./metrics').Metrics;
 
 class WavefrontSDKCounter extends Metrics {
   constructor() {
@@ -19,4 +19,6 @@ class WavefrontSDKCounter extends Metrics {
   }
 }
 
-export default WavefrontSDKCounter;
+module.exports = {
+  WavefrontSDKCounter
+};

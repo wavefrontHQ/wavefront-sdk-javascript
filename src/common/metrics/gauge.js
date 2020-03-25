@@ -1,4 +1,4 @@
-import Metrics from './metrics';
+const Metrics = require('./metrics').Metrics;
 
 class WavefrontSDKGauge extends Metrics {
   constructor(supplier) {
@@ -12,4 +12,6 @@ class WavefrontSDKGauge extends Metrics {
   }
 }
 
-export default WavefrontSDKGauge;
+module.exports = {
+  WavefrontSDKGauge
+};

@@ -1,3 +1,5 @@
 class Metrics {}
 
-export default Metrics;
+module.exports = {
+  Metrics
+};

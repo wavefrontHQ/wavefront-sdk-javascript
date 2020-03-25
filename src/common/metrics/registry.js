@@ -1,5 +1,5 @@
-import WavefrontSDKCounter from './counter';
-import WavefrontSDKGauge from './gauge';
+const WavefrontSDKCounter = require('./counter').WavefrontSDKCounter;
+const WavefrontSDKGauge = require('./gauge').WavefrontSDKGauge;
 
 class WavefrontSdkMetricsRegistry {
   constructor({
@@ -100,4 +100,6 @@ class WavefrontSdkMetricsRegistry {
   }
 }
 
-export default WavefrontSdkMetricsRegistry;
+module.exports = {
+  WavefrontSdkMetricsRegistry
+};

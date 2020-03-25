@@ -1,11 +1,8 @@
-import WavefrontSdkMetricsRegistry from './common/metrics/registry';
-import { SDK_METRIC_PREFIX } from './common/constants';
-import Queue, {
-  histogramToLineData,
-  metricToLineData,
-  spanLogToLineData,
-  tracingSpanToLineData
-} from './common/utils';
+const utils = require('./common/utils');
+const constants = require('./common/constants');
+const Queue = utils.Queue;
+const WavefrontSdkMetricsRegistry = require('./common/metrics/registry')
+  .WavefrontSdkMetricsRegistry;
 
 class WavefrontDirectClient {
   static WAVEFRONT_METRIC_FORMAT = 'wavefront';
@@ -46,7 +43,7 @@ class WavefrontDirectClient {
       // TODO: test destructuring
       self._sdkMetricsRegistry = WavefrontSdkMetricsRegistry({
         wfMetricSender: self,
-        prefix: `${SDK_METRIC_PREFIX}.core.sender.direct`
+        prefix: `${constants.SDK_METRIC_PREFIX}.core.sender.direct`
       });
     } else {
       self._sdkMetricsRegistry = WavefrontSdkMetricsRegistry({
@@ -173,7 +170,7 @@ class WavefrontDirectClient {
   send_metric(name, value, timestamp, source, tags) {
     let lineData;
     try {
-      lineData = metricToLineData(
+      lineData = util.metricToLineData(
         name,
         value,
         timestamp,
@@ -213,7 +210,7 @@ class WavefrontDirectClient {
   ) {
     let lineData;
     try {
-      lineData = histogramToLineData(
+      lineData = util.histogramToLineData(
         name,
         centroids,
         histogramGranularities,
@@ -258,7 +255,7 @@ class WavefrontDirectClient {
   ) {
     let lineData;
     try {
-      lineData = tracingSpanToLineData(
+      lineData = utils.tracingSpanToLineData(
         name,
         startMillis,
         durationMillis,
@@ -285,7 +282,7 @@ class WavefrontDirectClient {
     if (spanLogs) {
       let spanLineData;
       try {
-        spanLineData = spanLogToLineData(traceId, spanId, spanLogs);
+        spanLineData = utils.spanLogToLineData(traceId, spanId, spanLogs);
         self._spanLogsValid.inc();
       } catch (error) {
         self._spanLogsInvalid.inc();
@@ -328,4 +325,6 @@ class WavefrontDirectClient {
   }
 }
 
-export default WavefrontDirectClient;
+module.exports = {
+  WavefrontDirectClient
+};

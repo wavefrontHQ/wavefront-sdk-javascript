@@ -1,3 +1,8 @@
 const SDK_METRIC_PREFIX = '~sdk.javascript';
 
-export { SDK_METRIC_PREFIX };
+const SPAN_LOG_KEY = '_spanLogs';
+
+module.exports = {
+  SDK_METRIC_PREFIX,
+  SPAN_LOG_KEY
+};

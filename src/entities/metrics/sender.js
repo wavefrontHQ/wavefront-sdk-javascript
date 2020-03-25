@@ -4,4 +4,6 @@ class WavefrontMetricSender {
   sendMetric(name, value, timestamp, source, tags) {}
 }
 
-export default WavefrontMetricSender;
+module.exports = {
+  WavefrontMetricSender
+};
