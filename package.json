@@ -27,5 +27,7 @@
     "mocha": "^7.1.1",
     "prettier": "^1.19.1"
   },
-  "dependencies": {}
+  "dependencies": {
+    "tdigest": "latest"
+  }
 }
