@@ -71,7 +71,7 @@ class WavefrontSdkMetricsRegistry {
           );
         }
       } catch (error) {
-        // TODO: find better logging intetrface
+        // TODO: find better logging interface
         console.log('Unable to send internal SDK metric.');
       }
     }

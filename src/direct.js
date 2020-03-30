@@ -169,7 +169,6 @@ class WavefrontDirectClient {
       this._sdkMetricsRegistry
         .newCounter(`${entityPrefix}.report.${res.statusCode}`)
         .inc();
-      // console.log(res.statusCode);
     });
     req.write(data);
     req.end();

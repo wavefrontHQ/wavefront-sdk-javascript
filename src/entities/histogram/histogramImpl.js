@@ -91,7 +91,7 @@ class Snapshot {
    * @returns {Number}
    */
   getCount() {
-    return this.distribution.size();
+    return this.distribution.n;
   }
 }
 
@@ -133,7 +133,7 @@ class MinuteBin {
   bulkUpdateDist(means, counts) {
     if (means && counts) {
       for (let i = 0; i < Math.min(means.length, counts.length); i++) {
-        this.dist.push(means[i], counts[i]);
+        this.getDist().push(means[i], counts[i]);
       }
     }
   }
@@ -163,6 +163,7 @@ class WavefrontHistogramImpl {
     // TODO: think move to constants
     this._ACCURACY = 100;
     this._MAX_BINS = 10;
+
     this._clockMillis = clockMillis || this.currentClockMillis;
     this._priorMinuteBinsList = [];
     this._currentMinuteBin = new MinuteBin(
@@ -282,15 +283,11 @@ class WavefrontHistogramImpl {
    * @return {Snapshot} Snapshot of Histogram
    */
   getSnapshot() {
-    let snapshot = new TDigest(1 / this._ACCURACY);
+    let newDigest = new TDigest(1 / this._ACCURACY);
     for (let minuteBin of this.getPriorMinuteBinsList()) {
-      snapshot += minuteBin.dist;
+      minuteBin.getCentroids().forEach(c => newDigest.push(c.mean, c.n)); // TODO: push right?
     }
-    // let snapshot = this.getPriorMinuteBinsList().reduce(
-    //   (accumulator, b) => accumulator + b.dist,
-    //   TDigest(1 / this._ACCURACY)
-    // );
-    return new Snapshot(snapshot);
+    return new Snapshot(newDigest);
   }
 
   /**
@@ -332,7 +329,10 @@ class WavefrontHistogramImpl {
     this.getPriorMinuteBinsList().forEach(minuteBin => {
       let centroids = minuteBin.getCentroids();
       count += centroids.reduce((accumulator, c) => accumulator + c.n, 0);
-      total += centroids.reduce((accumulator, c) => accumulator + c.n * c.mean);
+      total += centroids.reduce(
+        (accumulator, c) => accumulator + c.n * c.mean,
+        0
+      );
     });
     return count !== 0 ? total / count : null;
   }
