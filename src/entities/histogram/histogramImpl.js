@@ -112,28 +112,38 @@ class Distribution {
   }
 }
 
+/**
+ * Representation of a bin holds histogram data in a minute.
+ */
 class MinuteBin {
+  /**
+   * Construct the Minute Bin.
+   * @param accuracy - Accuracy range from [0, 100]
+   * @param minuteMillis - The timestamp at the start of the minute.
+   */
   constructor(accuracy = 100, minuteMillis = null) {
     this.accuracy = accuracy;
     this.minuteMillis = minuteMillis;
-    this.dist = null;
+    this.dist = new TDigest(1 / this.accuracy);
   }
 
-  getDist() {
-    if (!this.dist) {
-      this.dist = new TDigest(1 / this.accuracy);
-    }
-    return this.dist;
-  }
-
+  /**
+   * Update the value in the distribution.
+   * @param value
+   */
   updateDist(value) {
-    this.getDist().push(value);
+    this.dist.push(value);
   }
 
+  /**
+   * Bulk update values in the distribution
+   * @param means
+   * @param counts
+   */
   bulkUpdateDist(means, counts) {
     if (means && counts) {
       for (let i = 0; i < Math.min(means.length, counts.length); i++) {
-        this.getDist().push(means[i], counts[i]);
+        this.dist.push(means[i], counts[i]);
       }
     }
   }
@@ -158,7 +168,14 @@ class MinuteBin {
   }
 }
 
+/**
+ * Wavefront implementation of a histogram.
+ */
 class WavefrontHistogramImpl {
+  /**
+   * Construct Wavefront Histogram.
+   * @param clockMillis - A function which returns timestamp
+   */
   constructor(clockMillis = null) {
     // TODO: think move to constants
     this._ACCURACY = 100;
@@ -205,6 +222,10 @@ class WavefrontHistogramImpl {
     this.getCurrentBin().bulkUpdateDist(means, counts);
   }
 
+  /**
+   * Retrieve the current bin.
+   * @returns {MinuteBin} - Current minute bin
+   */
   getCurrentBin() {
     return this.getOrUpdateCurrentBin(this.currentMinuteMillis());
   }
@@ -227,13 +248,32 @@ class WavefrontHistogramImpl {
     return this._currentMinuteBin;
   }
 
+  /**
+   * Return newly-updated _priorMinuteBinsList.
+   * @returns {[]|Array}
+   */
   getPriorMinuteBinsList() {
     this.getOrUpdateCurrentBin(this.currentMinuteMillis());
     return this._priorMinuteBinsList;
   }
 
+  /**
+   * Return the standard deviation of the values in the distribution.
+   */
   stdDev() {
-    // TODO: std dev
+    let mean = this.getMean();
+    let varianceSum = 0,
+      count = 0;
+    for (let minuteBin of this.getPriorMinuteBinsList()) {
+      let centroids = minuteBin.getCentroids();
+      count += centroids.reduce((accumulator, c) => accumulator + c.n, 0);
+      varianceSum += centroids.reduce(
+        (accumulator, c) => accumulator + c.n * (c.mean - mean) ** 2,
+        0
+      );
+    }
+    let variance = count === 0 ? 0 : varianceSum / count;
+    return Math.sqrt(variance);
   }
 
   /**

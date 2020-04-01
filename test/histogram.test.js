@@ -145,4 +145,11 @@ describe('Test Wavefront Histogram', function() {
     expect(testBuilder._inc100.getSnapshot().getSize()).to.equal(100);
     expect(testBuilder._inc1000.getSnapshot().getSize()).to.equal(1000);
   });
+
+  it('Test stddev', function() {
+    assert.closeTo(testBuilder._pow10.stdDev(), 30859.85, testBuilder._DELTA);
+    assert.closeTo(testBuilder._inc100.stdDev(), 28.87, testBuilder._DELTA);
+    assert.closeTo(testBuilder._inc1000.stdDev(), 288.67, testBuilder._DELTA);
+    expect(testBuilder._empty.stdDev()).to.equal(0);
+  });
 });
