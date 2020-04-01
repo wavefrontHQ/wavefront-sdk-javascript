@@ -1,13 +1,16 @@
+// Name prefix for internal diagnostic metrics for Wavefront SDKs.
 const SDK_METRIC_PREFIX = '~sdk.javascript';
 
+// Tag key for span logs.
 const SPAN_LOG_KEY = '_spanLogs';
 
-// Define static class properties
+// Format keys for wavefront direct client.
 const WAVEFRONT_METRIC_FORMAT = 'wavefront';
 const WAVEFRONT_HISTOGRAM_FORMAT = 'histogram';
 const WAVEFRONT_TRACING_SPAN_FORMAT = 'trace';
 const WAVEFRONT_SPAN_LOG_FORMAT = 'spanLogs';
 
+// Null value emitted for optional undefined tags.
 const NULL_TAG_VAL = 'none';
 
 // Tag key for defining an application.
@@ -19,14 +22,14 @@ const CLUSTER_TAG_KEY = 'cluster';
 // Tag key for defining a shard.
 const SHARD_TAG_KEY = 'shard';
 
-// Tag key  for defining a service.
+// Tag key for defining a service.
 const SERVICE_TAG_KEY = 'service';
 
 // Tag key for defining a component.
 const COMPONENT_TAG_KEY = 'component';
 
-// Heart beat interval.
-const HEART_BEAT_INTERVAL = 10;
+// Default report interval for heartbeat service.
+const HEART_BEAT_INTERVAL = 60 * 5;
 
 module.exports = {
   SDK_METRIC_PREFIX,

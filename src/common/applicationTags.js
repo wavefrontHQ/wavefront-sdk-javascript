@@ -19,11 +19,11 @@ class ApplicationTags {
     shard = null,
     customTags = null
   }) {
-    if (application == null) {
+    if (!application) {
       throw Error(`Missing "application" parameter in ApplicationTags!`);
     }
 
-    if (service == null) {
+    if (!service) {
       throw Error(`Missing "service" parameter in ApplicationTags!`);
     }
 

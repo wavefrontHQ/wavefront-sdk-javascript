@@ -5,6 +5,7 @@ const {
   SHARD_TAG_KEY,
   COMPONENT_TAG_KEY,
   HEART_BEAT_METRIC,
+  HEART_BEAT_INTERVAL,
   NULL_TAG_VAL
 } = require('./constants');
 
@@ -23,8 +24,7 @@ class HeartbeatService {
     this.wavefrontClient = wavefrontClient;
     this.applicationTags = applicationTags;
     this.source = source;
-    // TODO: move to constants
-    this.reportingIntervalSeconds = 60 * 5;
+    this.reportingIntervalSeconds = HEART_BEAT_INTERVAL;
     this.heartbeatMetricTagsList = [];
     this.customTagsSet = new Set();
 

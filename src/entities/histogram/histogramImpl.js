@@ -46,7 +46,7 @@ class Snapshot {
    */
   getMean() {
     let centroids = this.distribution.toArray();
-    if (centroids == null) return null;
+    if (!centroids) return null;
 
     let total = this.getSum(centroids);
     let count = centroids.reduce((accumulator, c) => accumulator + c.n, 0);
@@ -59,7 +59,7 @@ class Snapshot {
    * @returns {Number}
    */
   getSum(centroids = null) {
-    if (centroids == null) centroids = this.distribution.toArray();
+    if (!centroids) centroids = this.distribution.toArray();
     return centroids.reduce((accumulator, c) => accumulator + c.mean * c.n, 0);
   }
 
@@ -120,7 +120,7 @@ class MinuteBin {
   }
 
   getDist() {
-    if (this.dist == null) {
+    if (!this.dist) {
       this.dist = new TDigest(1 / this.accuracy);
     }
     return this.dist;
@@ -233,7 +233,7 @@ class WavefrontHistogramImpl {
   }
 
   stdDev() {
-    // TODO
+    // TODO: std dev
   }
 
   /**
@@ -285,7 +285,7 @@ class WavefrontHistogramImpl {
   getSnapshot() {
     let newDigest = new TDigest(1 / this._ACCURACY);
     for (let minuteBin of this.getPriorMinuteBinsList()) {
-      minuteBin.getCentroids().forEach(c => newDigest.push(c.mean, c.n)); // TODO: push right?
+      minuteBin.getCentroids().forEach(c => newDigest.push(c.mean, c.n));
     }
     return new Snapshot(newDigest);
   }
@@ -297,7 +297,7 @@ class WavefrontHistogramImpl {
    */
   getMax() {
     let maxCallback = (maxVal, currVal) => {
-      if (currVal == null) return maxVal;
+      if (!currVal) return maxVal;
       return Math.max(maxVal, Number(currVal.dist.percentile(1)));
     };
     let max = this.getPriorMinuteBinsList().reduce(maxCallback, -Infinity);
@@ -311,7 +311,7 @@ class WavefrontHistogramImpl {
    */
   getMin() {
     let minCallback = (minVal, currVal) => {
-      if (currVal == null) return minVal;
+      if (!currVal) return minVal;
       return Math.min(minVal, Number(currVal.dist.percentile(0)));
     };
     let min = this.getPriorMinuteBinsList().reduce(minCallback, Infinity);

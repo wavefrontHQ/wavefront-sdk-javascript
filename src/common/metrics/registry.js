@@ -52,7 +52,6 @@ class WavefrontSdkMetricsRegistry {
         if (val instanceof WavefrontSDKGauge) {
           let gaugeVal = val.getValue();
           if (gaugeVal) {
-            // TODO: implement sendMetric
             this.wfMetricSender.sendMetric(
               name,
               gaugeVal,

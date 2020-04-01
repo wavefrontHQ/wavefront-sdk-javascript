@@ -7,19 +7,17 @@ const utils = require('./common/utils'),
   zlib = require('zlib');
 
 class WavefrontDirectClient {
-  // TODO: changed to named parameter
-  constructor(
+  constructor({
     server,
     token,
     maxQueueSize = 50000,
     batchSize = 10000,
     flushIntervalSeconds = 1,
     enableInternalMetrics = true
-  ) {
+  }) {
     this.server = server;
     this._batchSize = batchSize;
     this._flushIntervalSeconds = flushIntervalSeconds;
-    // TODO: socket
     this._defaultSource = null;
     this._metricsBuffer = new Queue(maxQueueSize);
     this._histogramsBuffer = new Queue(maxQueueSize);
@@ -34,7 +32,6 @@ class WavefrontDirectClient {
     this._scheduleTimer();
 
     if (enableInternalMetrics) {
-      // TODO: test destructuring
       this._sdkMetricsRegistry = new WavefrontSdkMetricsRegistry({
         wfMetricSender: this,
         prefix: `${constants.SDK_METRIC_PREFIX}.core.sender.direct`

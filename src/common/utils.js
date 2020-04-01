@@ -154,10 +154,10 @@ function histogramToLineData(
   if (isBlank(name)) {
     throw new Error('Histogram name cannot be blank');
   }
-  if (histogramGranularities == null || histogramGranularities.size === 0) {
+  if (!histogramGranularities || histogramGranularities.size === 0) {
     throw new Error('Histogram granularities cannot be null or empty');
   }
-  if (centroids == null) {
+  if (!centroids) {
     throw new Error('A distribution should have at least one centroid');
   }
   if (isBlank(source)) {
