@@ -6,7 +6,20 @@ const utils = require('./common/utils'),
   https = require('https'),
   zlib = require('zlib');
 
+/**
+ * Wavefront direct ingestion client.
+ * Sends data directly to Wavefront cluster via the direct ingestion API.
+ */
 class WavefrontDirectClient {
+  /**
+   * Construct Direct Client.
+   * @param server - Server address, Example: https://INSTANCE.wavefront.com
+   * @param token - Token with Direct Data Ingestion permission granted
+   * @param maxQueueSize - Size of internal data buffer for each data type
+   * @param batchSize - Amount of data sent by one api call
+   * @param flushIntervalSeconds - Interval flush interval
+   * @param enableInternalMetrics
+   */
   constructor({
     server,
     token,
@@ -217,7 +230,7 @@ class WavefrontDirectClient {
       try {
         this._report(batch.join('\n'), dataFormat, entityPrefix, reportErrors);
       } catch (error) {
-        throw Error(
+        console.error(
           `Failed to report ${dataFormat} data points to wavefront ${error}`
         );
       }
@@ -225,10 +238,33 @@ class WavefrontDirectClient {
   }
 
   /**
-   * Flush all buffer before close the client.
+   * Flush all buffer and close the client.
    */
   close() {
-    // TODO: flush before close
+    this._batchReport(
+      this._metricsBuffer.toArray,
+      constants.WAVEFRONT_METRIC_FORMAT,
+      'points',
+      this._pointsReportErrors
+    );
+    this._batchReport(
+      this._histogramsBuffer.toArray,
+      constants.WAVEFRONT_HISTOGRAM_FORMAT,
+      'histograms',
+      this._histogramsReportErrors
+    );
+    this._batchReport(
+      this._tracingSpansBuffer.toArray,
+      constants.WAVEFRONT_TRACING_SPAN_FORMAT,
+      'spans',
+      this._spansReportErrors
+    );
+    this._batchReport(
+      this._spanLogsBuffer.toArray,
+      constants.WAVEFRONT_SPAN_LOG_FORMAT,
+      'span_logs',
+      this._spanLogsReportErrors
+    );
     clearInterval(this._timer);
     this._sdkMetricsRegistry.close(1);
   }

@@ -177,8 +177,12 @@ class WavefrontHistogramImpl {
    * @param clockMillis - A function which returns timestamp
    */
   constructor(clockMillis = null) {
-    // TODO: think move to constants
+    // accuracy = compression = 1 / delta.
     this._ACCURACY = 100;
+    // If a bin queue has exceeded MAX_BINS number of bins (e.g.,
+    // the queue has data that has yet to be reported for more than MAX_BINS
+    // number of minutes), delete the oldest bin. Defaulted to 10 because we
+    // can expect the histogram to be reported at least once every 10 minutes.
     this._MAX_BINS = 10;
 
     this._clockMillis = clockMillis || this.currentClockMillis;

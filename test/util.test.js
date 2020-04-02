@@ -308,6 +308,4 @@ describe('Test utility functions', function() {
       ].join(' ')
     );
   });
-
-  // TODO: add spanLogToLineData test
 });

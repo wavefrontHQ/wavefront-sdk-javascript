@@ -11,40 +11,46 @@ class Queue {
     this._maxQueueSize = maxQueueSize;
   }
 
+  /**
+   * Check if the queue contains any value.
+   * @returns {boolean}
+   */
   isEmpty() {
     return this._items.length === 0;
   }
 
+  /**
+   * Push a single value into the queue.
+   * @param val
+   */
   push(val) {
     if (this.size() >= this._maxQueueSize) {
-      throw Error('Exception raised because the queue is full.');
+      throw 'Exception raised because the queue is full.';
     } else {
       this._items.push(val);
     }
   }
 
-  dequeue() {
-    if (!this.isEmpty()) {
-      return this._items.shift();
-    }
-    return null;
-  }
-
-  peek() {
-    if (!this.isEmpty()) {
-      return this._items[0];
-    }
-    return null;
-  }
-
+  /**
+   * Get the size of the elements in the queue.
+   * @returns {number}
+   */
   size() {
     return this._items.length;
   }
 
+  /**
+   * Get the remaining capacity of the queue.
+   * @returns {number}
+   */
   remainCapacity() {
     return this._maxQueueSize - this._items.length;
   }
 
+  /**
+   * Get the elements of the queue as an array.
+   * @returns {[]|Array}
+   */
   get toArray() {
     return this._items;
   }
@@ -104,7 +110,7 @@ function sanitize(str) {
  */
 function metricToLineData(name, value, timestamp, source, tags, defaultSource) {
   if (isBlank(name)) {
-    console.error('Metrics name cannot be blank');
+    throw 'Metrics name cannot be blank';
   }
   if (isBlank(source)) {
     source = defaultSource;
@@ -117,10 +123,10 @@ function metricToLineData(name, value, timestamp, source, tags, defaultSource) {
   if (tags) {
     tags.forEach((value, key) => {
       if (isBlank(key)) {
-        console.error('Metric point tag key cannot be blank');
+        throw 'Metric point tag key cannot be blank';
       }
       if (isBlank(value)) {
-        console.error('Metric point tag value cannot be blank');
+        throw 'Metric point tag value cannot be blank';
       }
       strBuilder.push(sanitize(key) + '=' + sanitize(value));
     });
@@ -152,13 +158,13 @@ function histogramToLineData(
   defaultSource
 ) {
   if (isBlank(name)) {
-    throw new Error('Histogram name cannot be blank');
+    throw 'Histogram name cannot be blank';
   }
   if (!histogramGranularities || histogramGranularities.size === 0) {
-    throw new Error('Histogram granularities cannot be null or empty');
+    throw 'Histogram granularities cannot be null or empty';
   }
   if (!centroids) {
-    throw new Error('A distribution should have at least one centroid');
+    throw 'A distribution should have at least one centroid';
   }
   if (isBlank(source)) {
     source = defaultSource;
@@ -179,10 +185,10 @@ function histogramToLineData(
     if (tags) {
       tags.forEach((value, key) => {
         if (isBlank(key)) {
-          console.error('Histogram tag key cannot be blank');
+          throw 'Histogram tag key cannot be blank';
         }
         if (isBlank(value)) {
-          console.error('Histogram tag value cannot be blank');
+          throw 'Histogram tag value cannot be blank';
         }
         strBuilder.push(sanitize(key) + '=' + sanitize(value));
       });
@@ -229,7 +235,7 @@ function tracingSpanToLineData(
   defaultSource
 ) {
   if (isBlank(name)) {
-    throw new Error('Span name cannot be blank');
+    throw 'Span name cannot be blank';
   }
   if (isBlank(source)) {
     source = defaultSource;
@@ -254,10 +260,10 @@ function tracingSpanToLineData(
     let tagSet = new Set();
     for (const [key, value] of tags) {
       if (isBlank(key)) {
-        console.error('Histogram tag key cannot be blank');
+        throw 'Histogram tag key cannot be blank';
       }
       if (isBlank(value)) {
-        console.error('Histogram tag value cannot be blank');
+        throw 'Histogram tag value cannot be blank';
       }
       let curTag = sanitize(key) + '=' + sanitize(value);
       if (!tagSet.has(curTag)) {

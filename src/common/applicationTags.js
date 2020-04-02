@@ -20,11 +20,11 @@ class ApplicationTags {
     customTags = null
   }) {
     if (!application) {
-      throw Error(`Missing "application" parameter in ApplicationTags!`);
+      throw `Missing "application" parameter in ApplicationTags!`;
     }
 
     if (!service) {
-      throw Error(`Missing "service" parameter in ApplicationTags!`);
+      throw `Missing "service" parameter in ApplicationTags!`;
     }
 
     this._application = application;

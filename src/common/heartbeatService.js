@@ -80,7 +80,7 @@ class HeartbeatService {
         this.customTagsSet.delete(customTagsMap);
       });
     } catch (e) {
-      throw Error(`Can not report ${HEART_BEAT_METRIC} to wavefront`);
+      throw `Can not report ${HEART_BEAT_METRIC} to wavefront`;
     }
   }
 
