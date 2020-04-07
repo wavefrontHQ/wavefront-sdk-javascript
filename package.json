@@ -2,8 +2,10 @@
   "name": "wavefront-sdk-javascript",
   "version": "1.0.0",
   "description": "Wavefront Core Javascript SDK",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
+    "prebuild": "rimraf dist",
+    "build": "rollup -c",
     "lint": "eslint '**/*.js'",
     "lint:fix": "prettier-eslint '**/*.js' --write",
     "test": "mocha"
@@ -37,6 +39,8 @@
     "rollup-plugin-uglify": "^6.0.4"
   },
   "dependencies": {
+    "es6-promise": "^4.2.8",
+    "isomorphic-fetch": "^2.2.1",
     "tdigest": "latest"
   }
 }

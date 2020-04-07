@@ -1,15 +1,12 @@
-const Metrics = require('./metrics').Metrics;
-
 /**
  * Wavefront SDK Gauge.
  */
-class WavefrontSDKGauge extends Metrics {
+class WavefrontSDKGauge {
   /**
    * Construct Wavefront SDK Gauge.
    * @param supplier
    */
   constructor(supplier) {
-    super();
     this.supplier = supplier;
   }
 

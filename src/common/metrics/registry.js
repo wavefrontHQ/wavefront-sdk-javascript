@@ -1,5 +1,5 @@
-const WavefrontSDKCounter = require('./counter').WavefrontSDKCounter;
-const WavefrontSDKGauge = require('./gauge').WavefrontSDKGauge;
+const { WavefrontSDKCounter } = require('./counter');
+const { WavefrontSDKGauge } = require('./gauge');
 
 /**
  * Wavefront SDK Metrics Registry.
@@ -23,9 +23,10 @@ class WavefrontSdkMetricsRegistry {
     this.wfMetricSender = wfMetricSender;
     this.source = source;
     this.tags = tags;
-    this.prefix = prefix ? prefix + '.' : '';
-    this.reportingIntervalSecs = reportingIntervalSecs;
-    this.metrics = new Map();
+    this.prefix = prefix ? `${prefix}.` : '';
+    this.reportingIntervalSecs =
+      reportingIntervalSecs > 0 ? reportingIntervalSecs : 60;
+    this.metrics = {};
     this._timer = null;
     if (wfMetricSender) {
       this._scheduleTimer();
@@ -34,7 +35,6 @@ class WavefrontSdkMetricsRegistry {
 
   /**
    * Schedule timer for the internal metric sender.
-   * @private
    */
   _scheduleTimer() {
     this._timer = setInterval(() => this._report(), this.reportingIntervalSecs);
@@ -57,16 +57,15 @@ class WavefrontSdkMetricsRegistry {
   /**
    * Report internal SDK metric to Wavefront.
    * @param timeoutSecs
-   * @private
    */
   _report(timeoutSecs = null) {
-    let timestamp = Date.now();
-    for (const [key, val] of this.metrics.entries()) {
-      if (timeoutSecs && Date.now() - timestamp > timeoutSecs) break;
+    const timestamp = Date.now();
+    for (const [key, val] of Object.entries(this.metrics)) {
+      if (timeoutSecs && Date.now() - timestamp > timeoutSecs * 1000) break;
 
-      let name = this.prefix + key;
+      const name = this.prefix + key;
       if (val instanceof WavefrontSDKGauge) {
-        let gaugeVal = val.getValue();
+        const gaugeVal = val.getValue();
         if (gaugeVal) {
           this.wfMetricSender.sendMetric(
             name,
@@ -94,7 +93,7 @@ class WavefrontSdkMetricsRegistry {
    * @returns {WavefrontSDKCounter}
    */
   newCounter(name) {
-    return this._getOrAdd(name, new WavefrontSDKCounter());
+    return this._getOrAdd(name, WavefrontSDKCounter);
   }
 
   /**
@@ -104,14 +103,16 @@ class WavefrontSdkMetricsRegistry {
    * @returns {WavefrontSDKGauge}
    */
   newGauge(name, supplier) {
-    return this._getOrAdd(name, new WavefrontSDKGauge(supplier));
+    return this._getOrAdd(name, WavefrontSDKGauge, supplier);
   }
 
-  _getOrAdd(name, metric) {
+  _getOrAdd(name, initializer, supplier = null) {
     let existingMetric = this.metrics[name];
     if (existingMetric) return existingMetric;
-    this.metrics[name] = metric;
-    return metric;
+    this.metrics[name] = supplier
+      ? new initializer(supplier)
+      : new initializer();
+    return this.metrics[name];
   }
 }
 

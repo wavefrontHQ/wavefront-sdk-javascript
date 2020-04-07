@@ -1,14 +1,11 @@
-const Metrics = require('./metrics').Metrics;
-
 /**
  * Wavefront SDK Counter.
  */
-class WavefrontSDKCounter extends Metrics {
+class WavefrontSDKCounter {
   /**
    * Construct Wavefront SDK Counter.
    */
   constructor() {
-    super();
     this._count = 0;
   }
 

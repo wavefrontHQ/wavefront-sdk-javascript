@@ -79,17 +79,11 @@ class ApplicationTags {
    * @return {Array}
    */
   getAsList() {
-    let tags = [
+    const tags = [
       [constants.APPLICATION_TAG_KEY, this.application],
       [constants.SERVICE_TAG_KEY, this.service],
-      [
-        constants.CLUSTER_TAG_KEY,
-        this.cluster ? constants.NULL_TAG_VAL : this.cluster
-      ],
-      [
-        constants.SHARD_TAG_KEY,
-        this.shard ? constants.NULL_TAG_VAL : this.shard
-      ]
+      [constants.CLUSTER_TAG_KEY, this.cluster ?? constants.NULL_TAG_VAL],
+      [constants.SHARD_TAG_KEY, this.shard ?? constants.NULL_TAG_VAL]
     ];
     if (this.customTags != null) {
       tags.push(...this.customTags);

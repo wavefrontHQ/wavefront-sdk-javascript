@@ -1,10 +1,10 @@
 const utils = require('./common/utils'),
   constants = require('./common/constants'),
   Queue = utils.Queue,
-  WavefrontSdkMetricsRegistry = require('./common/metrics/registry')
-    .WavefrontSdkMetricsRegistry,
-  https = require('https'),
+  { WavefrontSdkMetricsRegistry } = require('./common/metrics/registry'),
   zlib = require('zlib');
+require('isomorphic-fetch');
+require('es6-promise').polyfill();
 
 /**
  * Wavefront direct ingestion client.
@@ -57,11 +57,11 @@ class WavefrontDirectClient {
 
     this._sdkMetricsRegistry.newGauge(
       'points.queue.size',
-      this._metricsBuffer.size()
+      this._metricsBuffer.size
     );
     this._sdkMetricsRegistry.newGauge(
       'points.queue.remaining_capacity',
-      this._metricsBuffer.remainCapacity()
+      this._metricsBuffer.remainCapacity
     );
     this._pointsValid = this._sdkMetricsRegistry.newCounter('points.valid');
     this._pointsInvalid = this._sdkMetricsRegistry.newCounter('points.invalid');
@@ -72,11 +72,11 @@ class WavefrontDirectClient {
 
     this._sdkMetricsRegistry.newGauge(
       'histograms.queue.size',
-      this._histogramsBuffer.size()
+      this._histogramsBuffer.size
     );
     this._sdkMetricsRegistry.newGauge(
       'histograms.queue.remaining_capacity',
-      this._histogramsBuffer.remainCapacity()
+      this._histogramsBuffer.remainCapacity
     );
     this._histogramsValid = this._sdkMetricsRegistry.newCounter(
       'histograms.valid'
@@ -93,11 +93,11 @@ class WavefrontDirectClient {
 
     this._sdkMetricsRegistry.newGauge(
       'spans.queue.size',
-      this._tracingSpansBuffer.size()
+      this._tracingSpansBuffer.size
     );
     this._sdkMetricsRegistry.newGauge(
       'spans.queue.remaining_capacity',
-      this._tracingSpansBuffer.remainCapacity()
+      this._tracingSpansBuffer.remainCapacity
     );
     this._spansValid = this._sdkMetricsRegistry.newCounter('spans.valid');
     this._spansInvalid = this._sdkMetricsRegistry.newCounter('spans.invalid');
@@ -108,11 +108,11 @@ class WavefrontDirectClient {
 
     this._sdkMetricsRegistry.newGauge(
       'span_logs.queue.size',
-      this._spanLogsBuffer.size()
+      this._spanLogsBuffer.size
     );
     this._sdkMetricsRegistry.newGauge(
       'span_logs.queue.remaining_capacity',
-      this._spanLogsBuffer.remainCapacity()
+      this._spanLogsBuffer.remainCapacity
     );
     this._spanLogsValid = this._sdkMetricsRegistry.newCounter(
       'span_logs.valid'
@@ -163,39 +163,30 @@ class WavefrontDirectClient {
   /**
    * Report data to server, and record metrics
    */
-  _reportToServer(data, options, entityPrefix, reportErrors) {
-    let req = https.request(options, res => {
-      res.on('data', d => {
-        process.stdout.write(d);
-      });
-    });
-
-    req.on('error', e => {
-      reportErrors.inc();
-      console.error(e);
-    });
-
-    req.on('response', res => {
+  async _reportToServer(options, dataFormat, entityPrefix, reportErrors) {
+    // TODO: only absolute URLs are supported
+    const url = `${this.server.replace(/\w+:/, '')}/report/?f=${dataFormat}`;
+    await fetch(encodeURI(url), options).then(function(response) {
+      console.log(response.status);
+      if (!response.ok) {
+        reportErrors.inc();
+        console.error(response.statusText);
+      }
       this._sdkMetricsRegistry
-        .newCounter(`${entityPrefix}.report.${res.statusCode}`)
+        .newCounter(`${entityPrefix}.report.${response.statusCode}`)
         .inc();
     });
-    req.write(data);
-    req.end();
   }
 
   /**
-   * One api call sending one given string data.
-   * @param {string} points - List of data in string format, concat by '\n'
+   * Api call that compress and send given string data.
+   * @param points - List of data in string format, concat by '\n'
    * @param {string} dataFormat - Type of data to be sent
    * @param {string} entityPrefix
    * @param reportErrors
-   * @private
    */
   _report(points, dataFormat, entityPrefix, reportErrors) {
     let options = {
-      hostname: this.server,
-      path: `/report/?f=${dataFormat}`,
       method: 'POST',
       headers: this._headers
     };
@@ -203,16 +194,13 @@ class WavefrontDirectClient {
       if (!err) {
         options.headers['Content-Encoding'] = 'gzip';
         options.headers['Content-Length'] = compressedPoints.length;
-        this._reportToServer(
-          compressedPoints,
-          options,
-          entityPrefix,
-          reportErrors
-        );
+        options['body'] = compressedPoints;
+        this._reportToServer(options, dataFormat, entityPrefix, reportErrors);
       } else {
         console.error('Error compressing data');
         options.headers['Content-Length'] = points.length;
-        this._reportToServer(points, options, entityPrefix, reportErrors);
+        options['body'] = points;
+        this._reportToServer(options, dataFormat, entityPrefix, reportErrors);
       }
     });
   }
@@ -223,7 +211,6 @@ class WavefrontDirectClient {
    * @param dataFormat {string}
    * @param entityPrefix {string}
    * @param reportErrors {string}
-   * @private
    */
   _batchReport(batchLineData, dataFormat, entityPrefix, reportErrors) {
     for (let batch of utils.getChunks(batchLineData, this._batchSize)) {

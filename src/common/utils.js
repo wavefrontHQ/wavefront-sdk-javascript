@@ -104,7 +104,7 @@ function sanitize(str) {
  * @param {Number} value - Metric value
  * @param {Number} timestamp
  * @param {string} source
- * @param {Map} tags
+ * @param {Object} tags
  * @param {string} defaultSource
  * @return {string}
  */
@@ -121,7 +121,7 @@ function metricToLineData(name, value, timestamp, source, tags, defaultSource) {
   }
   strBuilder.push('source=' + sanitize(source));
   if (tags) {
-    tags.forEach((value, key) => {
+    for (const [key, value] of Object.entries(tags)) {
       if (isBlank(key)) {
         throw 'Metric point tag key cannot be blank';
       }
@@ -129,7 +129,7 @@ function metricToLineData(name, value, timestamp, source, tags, defaultSource) {
         throw 'Metric point tag value cannot be blank';
       }
       strBuilder.push(sanitize(key) + '=' + sanitize(value));
-    });
+    }
   }
   return strBuilder.join(' ') + '\n';
 }
@@ -144,7 +144,7 @@ function metricToLineData(name, value, timestamp, source, tags, defaultSource) {
  * @param {Set} histogramGranularities
  * @param {Number} timestamp
  * @param {string} source
- * @param {Map} tags
+ * @param {Object} tags
  * @param {string} defaultSource
  * @return {string}
  */
@@ -183,7 +183,7 @@ function histogramToLineData(
     strBuilder.push(sanitize(name));
     strBuilder.push('source=' + sanitize(source));
     if (tags) {
-      tags.forEach((value, key) => {
+      for (const [key, value] of Object.entries(tags)) {
         if (isBlank(key)) {
           throw 'Histogram tag key cannot be blank';
         }
@@ -191,7 +191,7 @@ function histogramToLineData(
           throw 'Histogram tag value cannot be blank';
         }
         strBuilder.push(sanitize(key) + '=' + sanitize(value));
-      });
+      }
     }
     lineBuilder.push(strBuilder.join(' '));
   }
@@ -216,7 +216,7 @@ function histogramToLineData(
  * @param {string} spanId
  * @param {Array} parents - Array of UUID
  * @param {Array} followsFrom - Array of UUID
- * @param {Array} tags
+ * @param {Object} tags
  * @param {Map} spanLogs
  * @param {string} defaultSource
  * @return {string}

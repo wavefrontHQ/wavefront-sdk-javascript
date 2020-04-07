@@ -38,7 +38,7 @@ describe('Test utility functions', function() {
         42422,
         1493773500,
         'localhost',
-        new Map().set('datacenter', 'dc1'),
+        { datacenter: 'dc1' },
         'defaultSource'
       )
     ).to.equal(
@@ -51,7 +51,7 @@ describe('Test utility functions', function() {
         42422,
         null,
         'localhost',
-        new Map().set('datacenter', 'dc1'),
+        { datacenter: 'dc1' },
         'defaultSource'
       )
     ).to.equal(
@@ -81,7 +81,7 @@ describe('Test utility functions', function() {
         new Set().add(granularity.MINUTE),
         1493773500,
         'appServer1',
-        new Map().set('region', 'us-west'),
+        { region: 'us-west' },
         'defaultSource'
       )
     ).to.equal(
@@ -98,7 +98,7 @@ describe('Test utility functions', function() {
         new Set().add(granularity.MINUTE),
         null,
         'appServer1',
-        new Map().set('region', 'us-west'),
+        { region: 'us-west' },
         'defaultSource'
       )
     ).to.equal(
@@ -129,7 +129,7 @@ describe('Test utility functions', function() {
         new Set().add(granularity.MINUTE),
         1493773500,
         'appServer1',
-        new Map().set('region', 'us-west'),
+        { region: 'us-west' },
         'defaultSource'
       )
     ).to.throw('A distribution should have at least one centroid');
@@ -144,7 +144,7 @@ describe('Test utility functions', function() {
         new Set(),
         1493773500,
         'appServer1',
-        new Map().set('region', 'us-west'),
+        { region: 'us-west' },
         'defaultSource'
       )
     ).to.throw('Histogram granularities cannot be null or empty');
@@ -160,7 +160,7 @@ describe('Test utility functions', function() {
           new Set([granularity.MINUTE, granularity.HOUR, granularity.DAY]),
           1493773500,
           'appServer1',
-          new Map().set('region', 'us-west'),
+          { region: 'us-west' },
           'defaultSource'
         )
         .trim()

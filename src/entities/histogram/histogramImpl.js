@@ -286,7 +286,7 @@ class WavefrontHistogramImpl {
    * Note that invoking this method will also clear all data from the
    * aggregated bins, thereby changing the state of the system and
    * preventing data from being flushed more than once.
-   * @returns {Array}
+   * @returns {Distribution[]}
    */
   flushDistributions() {
     let distributions = [];
@@ -383,5 +383,6 @@ class WavefrontHistogramImpl {
 }
 
 module.exports = {
-  WavefrontHistogramImpl
+  WavefrontHistogramImpl,
+  Distribution
 };
