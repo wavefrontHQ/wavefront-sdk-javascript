@@ -1,8 +1,7 @@
 /**
  * Wavefront SDK Gauge.
  */
-
-class WavefrontSDKGauge {
+export default class WavefrontSDKGauge {
   /**
    * Construct Wavefront SDK Gauge.
    * @param supplier
@@ -12,7 +11,3 @@ class WavefrontSDKGauge {
     this.getValue = supplier;
   }
 }
-
-module.exports = {
-  WavefrontSDKGauge
-};

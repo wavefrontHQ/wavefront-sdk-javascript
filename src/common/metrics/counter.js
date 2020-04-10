@@ -1,7 +1,7 @@
 /**
  * Wavefront SDK Counter.
  */
-class WavefrontSDKCounter {
+export default class WavefrontSDKCounter {
   /**
    * Construct Wavefront SDK Counter.
    */
@@ -32,7 +32,3 @@ class WavefrontSDKCounter {
     this._count = 0;
   }
 }
-
-module.exports = {
-  WavefrontSDKCounter
-};

@@ -1,84 +1,32 @@
-const constants = require('./constants');
+import * as constants from './constants';
 
 /**
  * Metadata about your application represented as tags in Wavefront.
  */
-class ApplicationTags {
-  /**
-   * Construct ApplicationTags.
-   * @param application - Application Name
-   * @param service - Service Name
-   * @param cluster - Cluster Name
-   * @param shard - Shard Name
-   * @param customTags - Array of arrays of custom tags
-   */
-  constructor({
-    application,
-    service,
-    cluster = null,
-    shard = null,
-    customTags = null
-  }) {
-    if (!application) {
-      throw `Missing "application" parameter in ApplicationTags!`;
-    }
-
-    if (!service) {
-      throw `Missing "service" parameter in ApplicationTags!`;
-    }
-
-    this._application = application;
-    this._service = service;
-    this._cluster = cluster;
-    this._shard = shard;
-    this._customTags = customTags;
+export default function ApplicationTags({
+  application,
+  service,
+  cluster = null,
+  shard = null,
+  customTags = null
+}) {
+  if (!application) {
+    throw `Missing "application" parameter in ApplicationTags!`;
   }
-
-  /**
-   * Get Application Name.
-   * @returns {string}
-   */
-  get application() {
-    return this._application;
+  if (!service) {
+    throw `Missing "service" parameter in ApplicationTags!`;
   }
-
-  /**
-   * Get Service Name.
-   * @returns {string}
-   */
-  get service() {
-    return this._service;
-  }
-
-  /**
-   * Get Cluster Name.
-   * @returns {string}
-   */
-  get cluster() {
-    return this._cluster;
-  }
-
-  /**
-   * Get Shard Name.
-   * @returns {string}
-   */
-  get shard() {
-    return this._shard;
-  }
-
-  /**
-   * Get Custom Tags.
-   * @returns {Array}
-   */
-  get customTags() {
-    return this._customTags;
-  }
+  this.application = application;
+  this.service = service;
+  this.cluster = cluster;
+  this.shard = shard;
+  this.customTags = customTags;
 
   /**
    * Get all tags as an array.
    * @return {Array}
    */
-  getAsList() {
+  this.getAsList = () => {
     const tags = [
       [constants.APPLICATION_TAG_KEY, this.application],
       [constants.SERVICE_TAG_KEY, this.service],
@@ -89,7 +37,5 @@ class ApplicationTags {
       tags.push(...this.customTags);
     }
     return tags;
-  }
+  };
 }
-
-module.exports = { ApplicationTags };

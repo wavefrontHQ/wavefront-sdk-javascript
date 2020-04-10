@@ -1,8 +1,9 @@
-const expect = require('chai').expect;
-const assert = require('chai').assert;
-const describe = require('mocha').describe;
-const it = require('mocha').it;
-const histogram = require('../src/entities/histogram/histogramImpl');
+import { expect } from 'chai';
+import { assert } from 'chai';
+import { describe } from 'mocha';
+import { it } from 'mocha';
+
+import { WavefrontHistogramImpl } from '../src/entities/histogram/histogramImpl';
 
 class MockClock {
   constructor(timestamp) {
@@ -19,13 +20,13 @@ class TestBuilder {
     this._pow10 = this.createPow10Histogram(this.clock.get);
     this._inc100 = this.createIncHistogram(this.clock.get, 100);
     this._inc1000 = this.createIncHistogram(this.clock.get, 1000);
-    this._empty = new histogram.WavefrontHistogramImpl(this.clock.get);
+    this._empty = new WavefrontHistogramImpl(this.clock.get);
 
     this.clock.increment(60001);
   }
 
   createPow10Histogram(clockMillis) {
-    let h = new histogram.WavefrontHistogramImpl(clockMillis);
+    let h = new WavefrontHistogramImpl(clockMillis);
     h.update(0.1);
     h.update(1.0);
     h.update(1e1);
@@ -39,7 +40,7 @@ class TestBuilder {
   }
 
   createIncHistogram(clockMillis, upperBound) {
-    let h = new histogram.WavefrontHistogramImpl(clockMillis);
+    let h = new WavefrontHistogramImpl(clockMillis);
     for (let i = 1; i <= upperBound; i++) {
       h.update(i);
     }
@@ -94,7 +95,7 @@ describe('Test Wavefront Histogram', function() {
   });
 
   it('Test bulk update', function() {
-    let hist = new histogram.WavefrontHistogramImpl(testBuilder.clock.get);
+    let hist = new WavefrontHistogramImpl(testBuilder.clock.get);
     hist.bulkUpdate([24.2, 84.35, 1002.0], [80, 1, 9]);
     testBuilder.clock.increment(60001);
 

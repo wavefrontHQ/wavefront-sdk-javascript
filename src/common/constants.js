@@ -31,7 +31,10 @@ const COMPONENT_TAG_KEY = 'component';
 // Default report interval for heartbeat service.
 const HEART_BEAT_INTERVAL = 60 * 5;
 
-module.exports = {
+// Heartbeat metric.
+const HEART_BEAT_METRIC = '~component.heartbeat';
+
+export {
   SDK_METRIC_PREFIX,
   SPAN_LOG_KEY,
   WAVEFRONT_METRIC_FORMAT,
@@ -44,5 +47,6 @@ module.exports = {
   SERVICE_TAG_KEY,
   COMPONENT_TAG_KEY,
   NULL_TAG_VAL,
-  HEART_BEAT_INTERVAL
+  HEART_BEAT_INTERVAL,
+  HEART_BEAT_METRIC
 };

@@ -1,15 +1,16 @@
-const utils = require('./common/utils'),
-  constants = require('./common/constants'),
-  Queue = utils.Queue,
-  { WavefrontSDKMetricsRegistry } = require('./common/metrics/registry'),
-  pako = require('pako');
-require('isomorphic-fetch');
+import pako from 'pako';
+import fetch from 'isomorphic-fetch';
+
+import { Queue } from './common/utils';
+import * as utils from './common/utils';
+import * as constants from './common/constants';
+import WavefrontSDKMetricsRegistry from './common/metrics/registry';
 
 /**
  * Wavefront direct ingestion client.
  * Sends data directly to Wavefront cluster via the direct ingestion API.
  */
-class WavefrontDirectClient {
+export default class WavefrontDirectClient {
   /**
    * Construct Direct Client.
    * @param server - Server address, Example: https://INSTANCE.wavefront.com
@@ -466,7 +467,3 @@ class WavefrontDirectClient {
     );
   }
 }
-
-module.exports = {
-  WavefrontDirectClient
-};

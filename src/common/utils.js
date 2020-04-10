@@ -1,43 +1,25 @@
-class Queue {
+import { SPAN_LOG_KEY } from './constants';
+
+function Queue(maxQueueSize) {
   /**
    * Implements Javascript Queue.
    * @constructor
    * @param {number} maxQueueSize - The maximum capacity for the queue.
    */
-  constructor(maxQueueSize) {
-    this._items = [];
-    this._maxQueueSize = maxQueueSize;
-    this.size = () => this._items.length;
-    this.remainCapacity = () => this._maxQueueSize - this._items.length;
-  }
+  this._items = [];
+  this._maxQueueSize = maxQueueSize;
 
-  /**
-   * Check if the queue contains any value.
-   * @returns {boolean}
-   */
-  isEmpty() {
-    return this._items.length === 0;
-  }
-
-  /**
-   * Push a single value into the queue.
-   * @param val
-   */
-  push(val) {
+  this.push = val => {
     if (this.size() >= this._maxQueueSize) {
       throw 'Exception raised because the queue is full.';
     } else {
       this._items.push(val);
     }
-  }
-
-  /**
-   * Get the elements of the queue as an array.
-   * @returns {[]|Array}
-   */
-  get toArray() {
-    return this._items;
-  }
+  };
+  this.size = () => this._items.length;
+  this.remainCapacity = () => this._maxQueueSize - this._items.length;
+  this.toArray = () => this._items;
+  this.isEmpty = () => this._items.length === 0;
 }
 
 /**
@@ -239,7 +221,7 @@ function tracingSpanToLineData(
     followsFrom.forEach(uuid => strBuilder.push('followsFrom=' + uuid));
   }
   if (spanLogs) {
-    tags.push([constants.SPAN_LOG_KEY, 'true']);
+    tags.push([SPAN_LOG_KEY, 'true']);
   }
   if (tags) {
     let tagSet = new Set();
@@ -282,7 +264,7 @@ function spanLogToLineData(traceId, spanId, spanLogs, scrambler = null) {
   return JSON.stringify(spanLogMap);
 }
 
-module.exports = {
+export {
   metricToLineData,
   histogramToLineData,
   tracingSpanToLineData,

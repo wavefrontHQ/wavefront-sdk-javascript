@@ -1,10 +1,10 @@
-const { WavefrontSDKCounter } = require('./counter');
-const { WavefrontSDKGauge } = require('./gauge');
+import WavefrontSDKCounter from './counter';
+import WavefrontSDKGauge from './gauge';
 
 /**
  * Wavefront SDK Metrics Registry.
  */
-class WavefrontSDKMetricsRegistry {
+export default class WavefrontSDKMetricsRegistry {
   /**
    * Construct Wavefront SDK Metrics Registry.
    * @param wfMetricSender
@@ -115,7 +115,3 @@ class WavefrontSDKMetricsRegistry {
     return this.metrics[name];
   }
 }
-
-module.exports = {
-  WavefrontSDKMetricsRegistry: WavefrontSDKMetricsRegistry
-};

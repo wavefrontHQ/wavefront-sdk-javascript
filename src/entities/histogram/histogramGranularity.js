@@ -7,8 +7,4 @@ const MINUTE = '!M';
 const HOUR = '!H';
 const DAY = '!D';
 
-module.exports = {
-  MINUTE,
-  HOUR,
-  DAY
-};
+export { MINUTE, HOUR, DAY };

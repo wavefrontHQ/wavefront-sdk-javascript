@@ -1,10 +1,21 @@
-const expect = require('chai').expect;
-const describe = require('mocha').describe;
-const it = require('mocha').it;
-const utils = require('../src/common/utils');
-const granularity = require('../src/entities/histogram/histogramGranularity');
+import { expect } from 'chai';
+import { describe } from 'mocha';
+import { it } from 'mocha';
+
+import * as utils from '../src/common/utils';
+import * as granularity from '../src/entities/histogram/histogramGranularity';
 
 describe('Test utility functions', function() {
+  it('Validate queue', function() {
+    let queue = new utils.Queue(10);
+    queue.push(1);
+    queue.push(2);
+
+    expect(queue.size()).to.equal(2);
+    expect(queue.remainCapacity()).to.equal(8);
+    expect(queue.toArray()).to.eql([1, 2]);
+  });
+
   it('Validate get chunk', function() {
     let res = utils.getChunks([0, 0, 0, 0, 0, 0, 0], 3);
     expect(res).to.eql([[0, 0, 0], [0, 0, 0], [0]]);

@@ -1,9 +1,8 @@
-const expect = require('chai').expect;
-const describe = require('mocha').describe;
-const it = require('mocha').it;
+import { expect } from 'chai';
+import { describe } from 'mocha';
+import { it } from 'mocha';
 
-const ApplicationTags = require('../src/common/applicationTags')
-  .ApplicationTags;
+import ApplicationTags from '../src/common/applicationTags';
 
 describe('Test Wavefront Histogram', function() {
   it('Test application tag getAsList with custom tags', function() {
@@ -16,8 +15,8 @@ describe('Test Wavefront Histogram', function() {
     expect(res).to.eql([
       ['application', 'testApp'],
       ['service', 'testService'],
-      ['cluster', null],
-      ['shard', null],
+      ['cluster', 'none'],
+      ['shard', 'none'],
       ['customTagKey', 'customTagVal']
     ]);
   });

@@ -1,4 +1,4 @@
-const TDigest = require('tdigest').TDigest;
+import { TDigest } from 'tdigest';
 
 /**
  * Wrapper for TDigest distribution.
@@ -382,7 +382,4 @@ class WavefrontHistogramImpl {
   }
 }
 
-module.exports = {
-  WavefrontHistogramImpl,
-  Distribution
-};
+export { WavefrontHistogramImpl, Distribution };

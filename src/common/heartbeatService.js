@@ -1,4 +1,4 @@
-const {
+import {
   APPLICATION_TAG_KEY,
   CLUSTER_TAG_KEY,
   SERVICE_TAG_KEY,
@@ -7,12 +7,12 @@ const {
   HEART_BEAT_METRIC,
   HEART_BEAT_INTERVAL,
   NULL_TAG_VAL
-} = require('./constants');
+} from './constants';
 
 /**
  * Service that periodically reports component heartbeats to Wavefront.
  */
-class HeartbeatService {
+export default class HeartbeatService {
   /**
    *
    * @param {WavefrontDirectClient} wavefrontClient
@@ -41,7 +41,7 @@ class HeartbeatService {
         [COMPONENT_TAG_KEY]: component
       };
 
-      if (applicationTags.customTags) {
+      if (applicationTags?.customTags) {
         metricTags = { ...applicationTags.customTags, ...metricTags };
       }
       this.heartbeatMetricTagsList.push(metricTags);
@@ -94,7 +94,3 @@ class HeartbeatService {
     clearInterval(this._timer);
   }
 }
-
-module.exports = {
-  HeartbeatService
-};
