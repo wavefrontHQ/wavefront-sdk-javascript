@@ -1,5 +1,5 @@
-import pako from 'pako';
-import fetch from 'isomorphic-fetch';
+import * as pako from 'pako';
+import 'isomorphic-fetch';
 
 import { Queue } from './common/utils';
 import * as utils from './common/utils';
@@ -134,25 +134,25 @@ export default class WavefrontDirectClient {
   _scheduleTimer() {
     this._timer = setInterval(() => {
       this._batchReport(
-        this._metricsBuffer.toArray,
+        this._metricsBuffer.toArray(),
         constants.WAVEFRONT_METRIC_FORMAT,
         'points',
         this._pointsReportErrors
       );
       this._batchReport(
-        this._histogramsBuffer.toArray,
+        this._histogramsBuffer.toArray(),
         constants.WAVEFRONT_HISTOGRAM_FORMAT,
         'histograms',
         this._histogramsReportErrors
       );
       this._batchReport(
-        this._tracingSpansBuffer.toArray,
+        this._tracingSpansBuffer.toArray(),
         constants.WAVEFRONT_TRACING_SPAN_FORMAT,
         'spans',
         this._spansReportErrors
       );
       this._batchReport(
-        this._spanLogsBuffer.toArray,
+        this._spanLogsBuffer.toArray(),
         constants.WAVEFRONT_SPAN_LOG_FORMAT,
         'span_logs',
         this._spanLogsReportErrors
@@ -167,7 +167,6 @@ export default class WavefrontDirectClient {
     // TODO: only absolute URLs are supported
     const url = `${this.server.replace(/\w+:/, '')}/report/?f=${dataFormat}`;
     return await fetch(encodeURI(url), options).then(function(response) {
-      console.log(response.status);
       if (!response.ok) {
         reportErrors.inc();
         console.error(response.statusText);
@@ -225,25 +224,25 @@ export default class WavefrontDirectClient {
    */
   close() {
     this._batchReport(
-      this._metricsBuffer.toArray,
+      this._metricsBuffer.toArray(),
       constants.WAVEFRONT_METRIC_FORMAT,
       'points',
       this._pointsReportErrors
     );
     this._batchReport(
-      this._histogramsBuffer.toArray,
+      this._histogramsBuffer.toArray(),
       constants.WAVEFRONT_HISTOGRAM_FORMAT,
       'histograms',
       this._histogramsReportErrors
     );
     this._batchReport(
-      this._tracingSpansBuffer.toArray,
+      this._tracingSpansBuffer.toArray(),
       constants.WAVEFRONT_TRACING_SPAN_FORMAT,
       'spans',
       this._spansReportErrors
     );
     this._batchReport(
-      this._spanLogsBuffer.toArray,
+      this._spanLogsBuffer.toArray(),
       constants.WAVEFRONT_SPAN_LOG_FORMAT,
       'span_logs',
       this._spanLogsReportErrors
@@ -258,7 +257,7 @@ export default class WavefrontDirectClient {
    * @param {number} value - Metric value
    * @param {Number} timestamp
    * @param {string} source
-   * @param {Map} tags
+   * @param {Object} tags
    */
   sendMetric(name, value, timestamp, source, tags) {
     let lineData;
@@ -306,7 +305,7 @@ export default class WavefrontDirectClient {
    * @param {Set} histogramGranularities
    * @param {Number} timestamp
    * @param {string} source
-   * @param {Map} tags
+   * @param {Object} tags
    */
   sendDistribution(
     name,

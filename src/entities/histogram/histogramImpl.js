@@ -1,4 +1,4 @@
-import { TDigest } from 'tdigest';
+const TDigest = require('tdigest').TDigest;
 
 /**
  * Wrapper for TDigest distribution.
