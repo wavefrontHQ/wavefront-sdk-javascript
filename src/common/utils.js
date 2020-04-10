@@ -1,5 +1,3 @@
-const constants = require('../common/constants');
-
 class Queue {
   /**
    * Implements Javascript Queue.
@@ -9,6 +7,8 @@ class Queue {
   constructor(maxQueueSize) {
     this._items = [];
     this._maxQueueSize = maxQueueSize;
+    this.size = () => this._items.length;
+    this.remainCapacity = () => this._maxQueueSize - this._items.length;
   }
 
   /**
@@ -29,22 +29,6 @@ class Queue {
     } else {
       this._items.push(val);
     }
-  }
-
-  /**
-   * Get the size of the elements in the queue.
-   * @returns {number}
-   */
-  size() {
-    return this._items.length;
-  }
-
-  /**
-   * Get the remaining capacity of the queue.
-   * @returns {number}
-   */
-  remainCapacity() {
-    return this._maxQueueSize - this._items.length;
   }
 
   /**
@@ -88,6 +72,7 @@ function isBlank(str) {
  * @return {string} str - Sanitized string.
  */
 function sanitize(str) {
+  if (str == null) return str;
   let sanitized = str.replace(/\s/g, '-');
   if (sanitized.indexOf('"') >= 0) {
     sanitized = sanitized.replace(/["]+/g, '\\"');
@@ -105,7 +90,7 @@ function sanitize(str) {
  * @param {Number} timestamp
  * @param {string} source
  * @param {Object} tags
- * @param {string} defaultSource
+ * @param defaultSource
  * @return {string}
  */
 function metricToLineData(name, value, timestamp, source, tags, defaultSource) {

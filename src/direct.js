@@ -1,10 +1,9 @@
 const utils = require('./common/utils'),
   constants = require('./common/constants'),
   Queue = utils.Queue,
-  { WavefrontSdkMetricsRegistry } = require('./common/metrics/registry'),
-  zlib = require('zlib');
+  { WavefrontSDKMetricsRegistry } = require('./common/metrics/registry'),
+  pako = require('pako');
 require('isomorphic-fetch');
-require('es6-promise').polyfill();
 
 /**
  * Wavefront direct ingestion client.
@@ -45,12 +44,12 @@ class WavefrontDirectClient {
     this._scheduleTimer();
 
     if (enableInternalMetrics) {
-      this._sdkMetricsRegistry = new WavefrontSdkMetricsRegistry({
+      this._sdkMetricsRegistry = new WavefrontSDKMetricsRegistry({
         wfMetricSender: this,
         prefix: `${constants.SDK_METRIC_PREFIX}.core.sender.direct`
       });
     } else {
-      this._sdkMetricsRegistry = new WavefrontSdkMetricsRegistry({
+      this._sdkMetricsRegistry = new WavefrontSDKMetricsRegistry({
         wfMetricSender: null
       });
     }
@@ -166,15 +165,13 @@ class WavefrontDirectClient {
   async _reportToServer(options, dataFormat, entityPrefix, reportErrors) {
     // TODO: only absolute URLs are supported
     const url = `${this.server.replace(/\w+:/, '')}/report/?f=${dataFormat}`;
-    await fetch(encodeURI(url), options).then(function(response) {
+    return await fetch(encodeURI(url), options).then(function(response) {
       console.log(response.status);
       if (!response.ok) {
         reportErrors.inc();
         console.error(response.statusText);
       }
-      this._sdkMetricsRegistry
-        .newCounter(`${entityPrefix}.report.${response.statusCode}`)
-        .inc();
+      return response.status;
     });
   }
 
@@ -190,19 +187,17 @@ class WavefrontDirectClient {
       method: 'POST',
       headers: this._headers
     };
-    zlib.gzip(points, (err, compressedPoints) => {
-      if (!err) {
-        options.headers['Content-Encoding'] = 'gzip';
-        options.headers['Content-Length'] = compressedPoints.length;
-        options['body'] = compressedPoints;
-        this._reportToServer(options, dataFormat, entityPrefix, reportErrors);
-      } else {
-        console.error('Error compressing data');
-        options.headers['Content-Length'] = points.length;
-        options['body'] = points;
-        this._reportToServer(options, dataFormat, entityPrefix, reportErrors);
+    const compressedPoints = pako.gzip(points);
+    options.headers['Content-Encoding'] = 'gzip';
+    options.headers['Content-Length'] = compressedPoints.length;
+    options['body'] = Buffer.from(compressedPoints);
+    this._reportToServer(options, dataFormat, entityPrefix, reportErrors).then(
+      statusCode => {
+        this._sdkMetricsRegistry
+          .newCounter(`${entityPrefix}.report.${statusCode}`)
+          .inc();
       }
-    });
+    );
   }
 
   /**

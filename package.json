@@ -39,8 +39,8 @@
     "rollup-plugin-uglify": "^6.0.4"
   },
   "dependencies": {
-    "es6-promise": "^4.2.8",
     "isomorphic-fetch": "^2.2.1",
+    "pako": "^1.0.11",
     "tdigest": "latest"
   }
 }

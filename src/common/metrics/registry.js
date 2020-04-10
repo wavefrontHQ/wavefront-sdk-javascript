@@ -4,7 +4,7 @@ const { WavefrontSDKGauge } = require('./gauge');
 /**
  * Wavefront SDK Metrics Registry.
  */
-class WavefrontSdkMetricsRegistry {
+class WavefrontSDKMetricsRegistry {
   /**
    * Construct Wavefront SDK Metrics Registry.
    * @param wfMetricSender
@@ -117,5 +117,5 @@ class WavefrontSdkMetricsRegistry {
 }
 
 module.exports = {
-  WavefrontSdkMetricsRegistry
+  WavefrontSDKMetricsRegistry: WavefrontSDKMetricsRegistry
 };
