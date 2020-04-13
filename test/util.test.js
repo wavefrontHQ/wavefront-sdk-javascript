@@ -3,7 +3,7 @@ import { describe } from 'mocha';
 import { it } from 'mocha';
 
 import * as utils from '../src/common/utils';
-import * as granularity from '../src/entities/histogram/histogramGranularity';
+import granularity from '../src/entities/histogram/histogramGranularity';
 
 describe('Test utility functions', function() {
   it('Validate queue', function() {

@@ -7,4 +7,4 @@ const MINUTE = '!M';
 const HOUR = '!H';
 const DAY = '!D';
 
-export { MINUTE, HOUR, DAY };
+export default { MINUTE, HOUR, DAY };

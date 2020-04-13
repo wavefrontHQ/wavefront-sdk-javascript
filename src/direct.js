@@ -1,10 +1,10 @@
-import * as pako from 'pako';
-import 'isomorphic-fetch';
-
 import { Queue } from './common/utils';
 import * as utils from './common/utils';
 import * as constants from './common/constants';
 import WavefrontSDKMetricsRegistry from './common/metrics/registry';
+
+import 'isomorphic-fetch';
+const pako = require('pako');
 
 /**
  * Wavefront direct ingestion client.
@@ -25,7 +25,7 @@ export default class WavefrontDirectClient {
     token,
     maxQueueSize = 50000,
     batchSize = 10000,
-    flushIntervalSeconds = 1,
+    flushIntervalSeconds = 5,
     enableInternalMetrics = true
   }) {
     this.server = server;
