@@ -28,7 +28,7 @@ export default class HeartbeatService {
     this.heartbeatMetricTagsList = [];
     this.customTagsSet = new Set();
 
-    if (!Array.isArray(components)) {
+    if (components && !Array.isArray(components)) {
       components = [components];
     }
 
