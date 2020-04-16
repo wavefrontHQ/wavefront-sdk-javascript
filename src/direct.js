@@ -3,7 +3,7 @@ import * as utils from './common/utils';
 import * as constants from './common/constants';
 import WavefrontSDKMetricsRegistry from './common/metrics/registry';
 
-import 'isomorphic-fetch';
+require('isomorphic-fetch');
 const pako = require('pako');
 
 /**

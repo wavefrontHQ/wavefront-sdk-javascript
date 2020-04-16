@@ -1,6 +1,5 @@
 import { expect } from 'chai';
-import { describe } from 'mocha';
-import { it } from 'mocha';
+import { describe, it } from 'mocha';
 
 import * as utils from '../src/common/utils';
 import granularity from '../src/entities/histogram/histogramGranularity';

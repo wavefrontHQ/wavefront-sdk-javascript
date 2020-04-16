@@ -66,7 +66,7 @@ function send(wavefrontClient) {
   sendTracingSpan(wavefrontClient);
 }
 
-async function main() {
+function main() {
   if (process.argv.length !== 4) {
     return new Error(`Usage: node example.js <server> <token>`);
   }
@@ -74,16 +74,9 @@ async function main() {
     server: process.argv[2],
     token: process.argv[3]
   });
-  try {
-    while (true) {
-      send(wavefrontClient);
-      await new Promise(r => setTimeout(r, 2000));
-    }
-  } finally {
-    wavefrontClient.close();
-  }
+
+  send(wavefrontClient);
+  wavefrontClient.close();
 }
 
-main().then(err => {
-  console.log(err);
-});
+main();

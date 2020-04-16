@@ -1,6 +1,5 @@
 import { expect } from 'chai';
-import { describe } from 'mocha';
-import { it } from 'mocha';
+import { describe, it } from 'mocha';
 
 import ApplicationTags from '../src/common/applicationTags';
 

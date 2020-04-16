@@ -1,7 +1,6 @@
 import { expect } from 'chai';
 import { assert } from 'chai';
-import { describe } from 'mocha';
-import { it } from 'mocha';
+import { describe, it } from 'mocha';
 
 import { WavefrontHistogramImpl } from '../src/entities/histogram/histogramImpl';
 
@@ -26,7 +25,7 @@ class TestBuilder {
   }
 
   createPow10Histogram(clockMillis) {
-    let h = new WavefrontHistogramImpl(clockMillis);
+    const h = new WavefrontHistogramImpl(clockMillis);
     h.update(0.1);
     h.update(1.0);
     h.update(1e1);

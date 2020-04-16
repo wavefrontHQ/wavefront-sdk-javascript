@@ -2,7 +2,7 @@
   "name": "wavefront-sdk-javascript",
   "version": "1.0.0",
   "description": "Wavefront Core Javascript SDK",
-  "main": "dist/index.js",
+  "main": "dist/index.umd.js",
   "scripts": {
     "prebuild": "rimraf dist",
     "build": "rollup -c",

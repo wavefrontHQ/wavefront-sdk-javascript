@@ -7,7 +7,7 @@ export default {
   output: [
     {
       name: 'WavefrontSDK',
-      file: 'dist/index.js',
+      file: 'dist/index.umd.js',
       format: 'umd'
     }
   ],
