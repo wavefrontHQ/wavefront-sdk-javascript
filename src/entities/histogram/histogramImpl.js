@@ -289,10 +289,9 @@ class WavefrontHistogramImpl {
    * @returns {Distribution[]}
    */
   flushDistributions() {
-    let distributions = [];
     this.getOrUpdateCurrentBin(this.currentMinuteMillis());
-    this._priorMinuteBinsList.forEach(minuteBin =>
-      distributions.push(minuteBin.toDistribution())
+    const distributions = this._priorMinuteBinsList.map(x =>
+      x.toDistribution()
     );
     this._priorMinuteBinsList = [];
     return distributions;
@@ -340,10 +339,8 @@ class WavefrontHistogramImpl {
    * @return {Number}
    */
   getMax() {
-    let maxCallback = (maxVal, currVal) => {
-      if (!currVal) return maxVal;
-      return Math.max(maxVal, Number(currVal.dist.percentile(1)));
-    };
+    let maxCallback = (acc, cur) =>
+      Math.max(acc, Number(cur.dist.percentile(1)));
     let max = this.getPriorMinuteBinsList().reduce(maxCallback, -Infinity);
     return max === -Infinity ? null : max;
   }
@@ -354,10 +351,8 @@ class WavefrontHistogramImpl {
    * @return {Number}
    */
   getMin() {
-    let minCallback = (minVal, currVal) => {
-      if (!currVal) return minVal;
-      return Math.min(minVal, Number(currVal.dist.percentile(0)));
-    };
+    let minCallback = (acc, cur) =>
+      Math.min(acc, Number(cur.dist.percentile(0)));
     let min = this.getPriorMinuteBinsList().reduce(minCallback, Infinity);
     return min === Infinity ? null : min;
   }

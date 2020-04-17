@@ -55,77 +55,38 @@ export default class WavefrontDirectClient {
       });
     }
 
-    this._sdkMetricsRegistry.newGauge(
-      'points.queue.size',
-      this._metricsBuffer.size
-    );
-    this._sdkMetricsRegistry.newGauge(
-      'points.queue.remaining_capacity',
-      this._metricsBuffer.remainCapacity
-    );
-    this._pointsValid = this._sdkMetricsRegistry.newCounter('points.valid');
-    this._pointsInvalid = this._sdkMetricsRegistry.newCounter('points.invalid');
-    this._pointsDropped = this._sdkMetricsRegistry.newCounter('points.dropped');
-    this._pointsReportErrors = this._sdkMetricsRegistry.newCounter(
-      'points.report.errors'
-    );
-
-    this._sdkMetricsRegistry.newGauge(
-      'histograms.queue.size',
-      this._histogramsBuffer.size
-    );
-    this._sdkMetricsRegistry.newGauge(
-      'histograms.queue.remaining_capacity',
-      this._histogramsBuffer.remainCapacity
-    );
-    this._histogramsValid = this._sdkMetricsRegistry.newCounter(
-      'histograms.valid'
-    );
-    this._histogramsInvalid = this._sdkMetricsRegistry.newCounter(
-      'histograms.invalid'
-    );
-    this._histogramsDropped = this._sdkMetricsRegistry.newCounter(
-      'histograms.dropped'
-    );
-    this._histogramsReportErrors = this._sdkMetricsRegistry.newCounter(
-      'histograms.report.errors'
-    );
-
-    this._sdkMetricsRegistry.newGauge(
-      'spans.queue.size',
-      this._tracingSpansBuffer.size
-    );
-    this._sdkMetricsRegistry.newGauge(
-      'spans.queue.remaining_capacity',
-      this._tracingSpansBuffer.remainCapacity
-    );
-    this._spansValid = this._sdkMetricsRegistry.newCounter('spans.valid');
-    this._spansInvalid = this._sdkMetricsRegistry.newCounter('spans.invalid');
-    this._spansDropped = this._sdkMetricsRegistry.newCounter('spans.dropped');
-    this._spansReportErrors = this._sdkMetricsRegistry.newCounter(
-      'spans.report.errors'
-    );
-
-    this._sdkMetricsRegistry.newGauge(
-      'span_logs.queue.size',
-      this._spanLogsBuffer.size
-    );
-    this._sdkMetricsRegistry.newGauge(
-      'span_logs.queue.remaining_capacity',
-      this._spanLogsBuffer.remainCapacity
-    );
-    this._spanLogsValid = this._sdkMetricsRegistry.newCounter(
-      'span_logs.valid'
-    );
-    this._spanLogsInvalid = this._sdkMetricsRegistry.newCounter(
-      'span_logs.invalid'
-    );
-    this._spanLogsDropped = this._sdkMetricsRegistry.newCounter(
-      'span_logs.dropped'
-    );
-    this._spanLogsReportErrors = this._sdkMetricsRegistry.newCounter(
-      'span_logs.report.errors'
-    );
+    // Setup counters and gauges for SDK metrics
+    const counterMap = ['points', 'histograms', 'spans', 'spanLogs'].map(t => ({
+      [`_${t}Valid`]: `${t}.valid`,
+      [`_${t}Invalid`]: `${t}.invalid`,
+      [`_${t}Dropped`]: `${t}.dropped`,
+      [`_${t}ReportErrors`]: `${t}.report.errors`
+    }));
+    for (const m of counterMap) {
+      Object.entries(m).forEach(([key, value]) => {
+        this[key] = this._sdkMetricsRegistry.newCounter(value);
+      });
+    }
+    const gaugeMap = [
+      ['points.queue.size', this._metricsBuffer.size],
+      ['points.queue.remaining_capacity', this._metricsBuffer.remainCapacity],
+      ['histograms.queue.size', this._histogramsBuffer.size],
+      [
+        'histograms.queue.remaining_capacity',
+        this._histogramsBuffer.remainCapacity
+      ],
+      ['spans.queue.size', this._tracingSpansBuffer.size],
+      [
+        'spans.queue.remaining_capacity',
+        this._tracingSpansBuffer.remainCapacity
+      ],
+      ['span_logs.queue.size', this._spanLogsBuffer.size],
+      [
+        'span_logs.queue.remaining_capacity',
+        this._spanLogsBuffer.remainCapacity
+      ]
+    ];
+    gaugeMap.forEach(g => this._sdkMetricsRegistry.newGauge(g[0], g[1]));
   }
 
   /**

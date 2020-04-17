@@ -1,12 +1,12 @@
 {
   "name": "wavefront-sdk-javascript",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "Wavefront Core Javascript SDK",
   "main": "dist/index.umd.js",
   "scripts": {
     "prebuild": "rimraf dist",
     "build": "rollup -c",
-    "start": "node -r @babel/preset-env -r @babel/register -r regenerator-runtime example.js <server> <token>",
+    "start": "node -r @babel/preset-env -r @babel/register -r regenerator-runtime example.js",
     "lint": "eslint '**/*.js'",
     "lint:fix": "prettier-eslint '**/*.js' --write",
     "test": "mocha"
@@ -17,7 +17,7 @@
   },
   "keywords": [],
   "author": "yzheqing@vmware.com",
-  "license": "ISC",
+  "license": "Apache-2.0",
   "bugs": {
     "url": "https://github.com/wavefrontHQ/wavefront-sdk-javascript/issues"
   },
