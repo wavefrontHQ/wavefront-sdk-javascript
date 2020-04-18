@@ -1,0 +1,50 @@
+{
+  "name": "wavefront-sdk-javascript",
+  "version": "0.0.1",
+  "description": "Wavefront Core Javascript SDK",
+  "main": "dist/index.umd.js",
+  "scripts": {
+    "prebuild": "rimraf dist",
+    "build": "rollup -c",
+    "start": "node -r @babel/preset-env -r @babel/register -r regenerator-runtime example.js",
+    "lint": "eslint '**/*.js'",
+    "lint:fix": "prettier-eslint '**/*.js' --write",
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wavefrontHQ/wavefront-sdk-javascript.git"
+  },
+  "keywords": [],
+  "author": "yzheqing@vmware.com",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/wavefrontHQ/wavefront-sdk-javascript/issues"
+  },
+  "homepage": "https://github.com/wavefrontHQ/wavefront-sdk-javascript#readme",
+  "devDependencies": {
+    "@babel/core": "^7.9.0",
+    "@babel/plugin-proposal-export-default-from": "^7.8.3",
+    "@babel/preset-env": "^7.9.5",
+    "@babel/register": "^7.9.0",
+    "@babel/runtime": "^7.9.2",
+    "babel": "^6.23.0",
+    "chai": "^4.2.0",
+    "eslint": "^6.8.0",
+    "eslint-config-prettier": "^6.10.0",
+    "eslint-plugin-prettier": "^3.1.2",
+    "mocha": "^7.1.1",
+    "prettier": "^1.19.1",
+    "regenerator-runtime": "^0.13.5",
+    "rimraf": "^3.0.2",
+    "rollup": "^1.20.0",
+    "rollup-plugin-babel": "^4.4.0",
+    "rollup-plugin-node-resolve": "^5.2.0",
+    "rollup-plugin-uglify": "^6.0.4"
+  },
+  "dependencies": {
+    "isomorphic-fetch": "^2.2.1",
+    "pako": "^1.0.11",
+    "tdigest": "latest"
+  }
+}
