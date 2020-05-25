@@ -11,7 +11,10 @@ module.exports = api => {
     ]
   ];
 
-  const plugins = ['@babel/plugin-proposal-export-default-from'];
+  const plugins = [
+    '@babel/plugin-proposal-export-default-from',
+    '@babel/plugin-transform-runtime',
+  ];
 
   return { presets, plugins };
 };
