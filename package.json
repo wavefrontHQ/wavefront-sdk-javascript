@@ -27,7 +27,6 @@
     "@babel/plugin-proposal-export-default-from": "^7.8.3",
     "@babel/preset-env": "^7.9.5",
     "@babel/register": "^7.9.0",
-    "@babel/runtime": "^7.9.2",
     "babel": "^6.23.0",
     "chai": "^4.2.0",
     "eslint": "^6.8.0",
@@ -43,6 +42,7 @@
     "rollup-plugin-uglify": "^6.0.4"
   },
   "dependencies": {
+    "@babel/runtime": "^7.9.2",
     "isomorphic-fetch": "^2.2.1",
     "pako": "^1.0.11",
     "tdigest": "latest"
