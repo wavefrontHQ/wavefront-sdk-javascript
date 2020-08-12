@@ -118,7 +118,7 @@ export default class WavefrontDirectClient {
         'span_logs',
         this._spanLogsReportErrors
       );
-    }, this._flushIntervalSeconds);
+    }, this._flushIntervalSeconds * 1000);
   }
 
   /**
