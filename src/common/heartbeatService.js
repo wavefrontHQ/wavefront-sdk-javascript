@@ -54,7 +54,7 @@ export default class HeartbeatService {
    * Schedule the timer to report.
    */
   _run() {
-    this._timer = setInterval(this._report, this.reportingIntervalSeconds);
+    this._timer = setInterval(this._report, this.reportingIntervalSeconds * 1000);
   }
 
   _report() {

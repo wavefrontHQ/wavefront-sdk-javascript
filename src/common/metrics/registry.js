@@ -37,7 +37,7 @@ export default class WavefrontSDKMetricsRegistry {
    * Schedule timer for the internal metric sender.
    */
   _scheduleTimer() {
-    this._timer = setInterval(() => this._report(), this.reportingIntervalSecs);
+    this._timer = setInterval(() => this._report(), this.reportingIntervalSecs * 1000);
   }
 
   /**
