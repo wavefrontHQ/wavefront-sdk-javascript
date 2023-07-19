@@ -4,16 +4,12 @@
   "description": "Wavefront Core Javascript SDK",
   "main": "dist/index.umd.js",
   "scripts": {
-    "preinstall": "npx force-resolutions",
     "prebuild": "rimraf dist",
     "build": "rollup -c",
     "start": "node -r @babel/preset-env -r @babel/register -r regenerator-runtime example.js",
     "lint": "eslint '**/*.js'",
     "lint:fix": "prettier-eslint '**/*.js' --write",
     "test": "mocha"
-  },
-  "resolutions": {
-    "semver": "7.5.5"
   },
   "repository": {
     "type": "git",
